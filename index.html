@@ -270,9 +270,9 @@
      Not a pinned scene: it scrolls past normally. The heading fills in
      reading order as it comes up the window — the frame draws it half read,
      which is the state this animates through — and the cards rise into place
-     behind it. Once the row has come up, the section below holds it still
-     while the cards open one after another and the third dives into its
-     clip. See js/scene.js.
+     behind it. The cards open one after another as the row comes up the
+     window, the third last, and as the row comes to rest the section below
+     takes the third into its clip. See js/scene.js.
      ===================================================================== -->
 <section class="cards" data-cards data-node-id="339:343">
 
@@ -297,10 +297,11 @@
        rather than rewrapping them.
 
        The frame draws the third open, which is where the scroll leaves them:
-       they arrive with the first open, hand the width along one card at a
-       time, and the third then opens out into the window and into its clip.
-       The track holds the row's place in the page while the row itself is
-       lifted out and held still for that — see js/scene.js. -->
+       they arrive with the first open and hand the width along one card at a
+       time as they come up the window, and the third then opens out into the
+       window and into its clip. For that last move the row is lifted out of
+       the page and held where it stood; the track keeps its place — see
+       js/scene.js. -->
   <div class="cards__track" data-card-track>
     <div class="cards__row" data-card-row data-node-id="1486:22523">
 
@@ -373,9 +374,9 @@
      Figma: "Shot 2 - Outside Spacecraft - Intro" (342:1556) into
      "Shot 3 - Outside Spacecraft - Device" (342:1597).
 
-     This section's first stretch belongs to the cards above: it holds their
-     row still while each opens in turn. Then the third card opens out until
-     it fills the window — its own copy fading as it goes — and only once it
+     The cards above have opened one after another on their way up the
+     window, the third last. As the row comes to rest here, the third card
+     opens out until it fills the window — its own copy fading as it goes — and only once it
      has does the clip inside it start to run, flying out through the
      illuminator to the satellite. The intro
      copy writes itself on the way the tunnel's does; the device copy arrives

@@ -142,29 +142,27 @@
   var EXIT_STAGGER = 0.12;
 
   /*
-   * Outside the spacecraft. The section first holds the cards above still
-   * while they open one after another, then runs two clips end to end — so
-   * its scroll is read as three legs, and every fraction below is a fraction
-   * of whichever leg it belongs to rather than of the section.
+   * Outside the spacecraft. The section runs two clips end to end, so its
+   * scroll is read as two legs and every fraction below is a fraction of
+   * whichever leg it belongs to rather than of the section.
    *
-   * The lengths are the ones --scene-length-flight is built out of: the cards
-   * are given 200 of scroll, the cupola leg keeps the 420 it has always had,
-   * and the orbit that carries on from it 560 more. Changing any of them
-   * means changing that custom property to match.
+   * The lengths are the ones --scene-length-flight is built out of: the
+   * cupola leg keeps the 420 of scroll it has always had, and the orbit that
+   * carries on from it is given 560 more. Changing either means changing that
+   * custom property to match.
    */
-  var FLIGHT_CARDS_VH = 200;
   var FLIGHT_CUPOLA_VH = 420;
   var FLIGHT_ORBIT_VH = 560;
-  var FLIGHT_CARDS_SPLIT =
-    FLIGHT_CARDS_VH / (FLIGHT_CARDS_VH + FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
-  /* The two clips' split, as a share of what is left after the cards. */
   var FLIGHT_SPLIT = FLIGHT_CUPOLA_VH / (FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
   /*
-   * Fractions of the cards' leg. The first card is open as the row arrives;
-   * each hand-along is a move between two holds, so every card stands open
-   * long enough to be read before the next takes its width.
+   * The cards above open while they are still on the move — nothing holds
+   * them; the width is handed along as the row comes up the window. These
+   * are fractions of the row's way up: from its top coming in at the window's
+   * foot to where it stands when this section takes over and the dive
+   * begins. The first is open as it arrives, and each hand-along is a move
+   * between two holds, so the third has stood open a while before it dives.
    */
-  var CARDS_TO_SECOND = [0.15, 0.4];
+  var CARDS_TO_SECOND = [0.25, 0.5];
   var CARDS_TO_THIRD = [0.6, 0.85];
   /*
    * The scroll the hand-over is dissolved across. The cupola clip's last
@@ -1325,8 +1323,8 @@
    * The heading fills in reading order, which is the state 339:374 is drawn
    * in: read characters go transparent and let the paragraph's gradient
    * through, the rest keep their 20%. The cards rise as they arrive, each a
-   * beat after the one before. Which of them stands open is the flight's to
-   * decide — it holds the row still for that — so none of it is here.
+   * beat after the one before. Which of them stands open, and the third's
+   * way into its clip, are the flight's to decide, so none of it is here.
    */
   function setUpCards() {
     var section = document.querySelector('[data-cards]');
@@ -1357,7 +1355,7 @@
       /*
        * Read off the track, which stands where the cards do but never moves
        * with them: a card's own rect carries the 40px it rises through, and
-       * once the row is held still it says nothing about the scroll at all.
+       * once the row is held for the dive it says nothing about the scroll.
        */
       var rowTop = track ? track.getBoundingClientRect().top : 0;
       for (var c = 0; c < cards.length; c++) {
@@ -1392,13 +1390,13 @@
    * ------------------------------------------------------------------ */
 
   /*
-   * The cards above are held still while each opens in turn; then the third
-   * opens out until it fills the window, and only then does the clip inside
-   * it start to run.
+   * The cards above open one after another as they come up the window; as
+   * the row comes to rest the third opens out until it fills the window, and
+   * only then does the clip inside it start to run.
    *
-   * Holding them means taking the row out of the page, so over that stretch
-   * it is fixed where it stood, and growing the third means taking it out of
-   * the row in turn: its rect is interpolated from the whole row to the whole
+   * That last move holds the row where it stood, which means taking it out
+   * of the page and fixing it there, and growing the third means taking it
+   * out of the row in turn: its rect is interpolated from the whole row to the whole
    * window. Every rect is worked out afresh each frame rather than captured
    * once, so arriving at any scroll position lands on the right boxes.
    */
@@ -1483,6 +1481,7 @@
     var orbit = card ? card.querySelector('[data-flight-orbit]') : null;
     var row = card ? card.closest('[data-card-row]') : null;
     var track = row ? row.closest('[data-card-track]') : null;
+    var stand = track ? track.closest('[data-cards]') : null;
     var cards = row ? [].slice.call(row.querySelectorAll('[data-card]')) : [];
     var clips = card ? [].slice.call(card.querySelectorAll('.card__clip')) : [];
     var intro = scene.querySelector('[data-flight-intro]');
@@ -1492,7 +1491,7 @@
     var pointTitle = scene.querySelector('[data-flight-point-title]');
     var pointBody = scene.querySelector('[data-flight-point-body]');
     var point = -1;
-    if (!video || !card || !heading || !track) return;
+    if (!video || !card || !heading || !track || !stand) return;
 
     var letters = splitCharacters(heading);
     var seek = seeker(video);
@@ -1526,22 +1525,13 @@
     }
 
     register(function () {
-      var whole = progressOf(scene);
+      var p = progressOf(scene);
       /*
-       * Three legs. The first is the cards': it holds their row still and
-       * hands the open width along it. What is left is the move this section
-       * has always made, and is read as `p` exactly as the whole section was
-       * before the cards were given their stretch — so nothing that reads it
-       * below has had to change.
-       */
-      var pk = clamp01(whole / FLIGHT_CARDS_SPLIT);
-      var p = clamp01((whole - FLIGHT_CARDS_SPLIT) / (1 - FLIGHT_CARDS_SPLIT));
-      /*
-       * Two clips, one move. That remainder is split at the frame the cupola
-       * clip runs out on: everything the first leg does is read off `p`
-       * rescaled to its own length, and the orbit that carries the shot on is
-       * read off what is left. Both are clamped, so the first leg simply
-       * holds at its end while the second runs.
+       * Two clips, one move. The section's scroll is split at the frame the
+       * cupola clip runs out on: everything the first leg does is read off
+       * `p` rescaled to its own length, and the orbit that carries the shot
+       * on is read off what is left. Both are clamped, so the first leg
+       * simply holds at its end while the second runs.
        */
       var pc = clamp01(p / FLIGHT_SPLIT);
       var po = clamp01((p - FLIGHT_SPLIT) / (1 - FLIGHT_SPLIT));
@@ -1572,13 +1562,6 @@
       var vh = window.innerHeight;
       var aspect = video.videoWidth ? video.videoWidth / video.videoHeight : CLIP_ASPECT;
 
-      /*
-       * Which card stands open: the first as the row arrives, and the width
-       * handed along to the second and then the third over the cards' leg.
-       */
-      var which =
-        smooth(clamp01((pk - CARDS_TO_SECOND[0]) / (CARDS_TO_SECOND[1] - CARDS_TO_SECOND[0]))) +
-        smooth(clamp01((pk - CARDS_TO_THIRD[0]) / (CARDS_TO_THIRD[1] - CARDS_TO_THIRD[0])));
 
       /*
        * Measured off the track, never off the row: the row is fixed by the
@@ -1597,9 +1580,26 @@
       var x0 = tb.left;
       var y0 = tb.top - scene.getBoundingClientRect().top;
       var h0 = tb.height;
+
+      /*
+       * Which card stands open, read off how far the row has come up the
+       * window — the first as it arrives, the width handed along to the
+       * second and then the third as it rises. Its way up runs from its top
+       * at the window's foot to where it stands as this section pins: the
+       * cards section's foot level with the window's, which leaves the row
+       * that section's 160 and its own 558 above it, whatever the window's
+       * height. So the third is open, and has been a while, as the dive
+       * starts — and once the row is held for the dive the track goes on up
+       * past that point and the reading simply stays at the third.
+       */
+      var up = stand.getBoundingClientRect().bottom - tb.top;
+      var rise = clamp01((vh - tb.top) / up);
+      var which =
+        smooth(clamp01((rise - CARDS_TO_SECOND[0]) / (CARDS_TO_SECOND[1] - CARDS_TO_SECOND[0]))) +
+        smooth(clamp01((rise - CARDS_TO_THIRD[0]) / (CARDS_TO_THIRD[1] - CARDS_TO_THIRD[0])));
       var share = cardWidths(tb.width, which, widen);
 
-      if (whole > 0) {
+      if (p > 0) {
         row.classList.add('is-held');
         place(row, { x: x0, y: y0, w: tb.width, h: h0 });
       } else {

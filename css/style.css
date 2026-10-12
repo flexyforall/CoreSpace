@@ -172,14 +172,12 @@
    */
   --scene-length-hero: 100vh;
   /*
-   * The flight is the cards opening and then two clips end to end: one
-   * window of pin, 200 of scroll for the cards above to hand their width
-   * along, then 420 for the cupola leg — what it has always had — and 560
-   * more for the orbit that carries on from it. js/scene.js splits its
-   * progress on exactly those three lengths, so they have to be changed
-   * together.
+   * The flight is two clips end to end: one window of pin, then 420 of
+   * scroll for the cupola leg — what it has always had — and 560 more for
+   * the orbit that carries on from it. js/scene.js splits its progress on
+   * exactly those two lengths, so they have to be changed together.
    */
-  --scene-length-flight: 1280vh;
+  --scene-length-flight: 1080vh;
   --scene-length-role: 560vh;
   /*
    * The use section runs a whole sequence rather than one move: the line, the
@@ -1187,9 +1185,10 @@ html.is-held [data-scene='hero'] button {
 }
 
 /*
- * The row's place in the page. The row itself is lifted out and held still
- * while the cards open — js/scene.js fixes it to the window — and this keeps
- * the section the height it was, so nothing below moves when it goes.
+ * The row's place in the page. The row itself is lifted out and held where
+ * it stood while the third card opens out into the window — js/scene.js
+ * fixes it there — and this keeps the section the height it was, so nothing
+ * below moves when it goes.
  */
 .cards__track {
   position: relative;
