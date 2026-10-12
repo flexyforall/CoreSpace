@@ -270,9 +270,9 @@
      Not a pinned scene: it scrolls past normally. The heading fills in
      reading order as it comes up the window — the frame draws it half read,
      which is the state this animates through — and the cards rise into place
-     behind it. The cards open one after another as the row comes up the
-     window, the third last, and as the row comes to rest the section below
-     takes the third into its clip. See js/scene.js.
+     behind it. The row comes to rest with the right-hand card open, and the
+     section below holds it in view while the width is handed leftwards card
+     by card; then the left card dives into its clip. See js/scene.js.
      ===================================================================== -->
 <section class="cards" data-cards data-node-id="339:343">
 
@@ -296,48 +296,21 @@
        whatever the card's, so a folded card shows the start of every line
        rather than rewrapping them.
 
-       The frame draws the third open, which is where the scroll leaves them:
-       they arrive with the first open and hand the width along one card at a
-       time as they come up the window, and the third then opens out into the
-       window and into its clip. For that last move the row is lifted out of
-       the page and held where it stood; the track keeps its place — see
-       js/scene.js. -->
+       The width opens right to left, so the frame's order is turned round:
+       the cupola card, which opens last and dives, stands on the left. The
+       row comes up the window with the right-hand card open and comes to
+       rest, and the section below holds it in view while the open width is
+       handed leftwards one card at a time, each standing open long enough to
+       be read. Then the left card opens out into the window and into its
+       clip. The track keeps the row's place in the page while it is held —
+       see js/scene.js. -->
   <div class="cards__track" data-card-track>
     <div class="cards__row" data-card-row data-node-id="1486:22523">
 
-      <article class="card" data-card data-node-id="1486:22551">
-        <!-- 477:11525 — the picture, 900 wide whatever the card's width, so
-             opening a card uncovers more of it rather than scaling it -->
-        <div class="card__media" data-node-id="I1486:22551;477:11525" aria-hidden="true">
-          <img class="card__picture" src="assets/images/card-power.jpg" alt="" width="2000" height="1116" decoding="async">
-        </div>
-        <span class="card__tick card__tick--tl" data-node-id="I1486:22551;477:11517"></span>
-        <span class="card__tick card__tick--tr" data-node-id="I1486:22551;477:11519"></span>
-        <span class="card__tick card__tick--br" data-node-id="I1486:22551;477:11521"></span>
-        <span class="card__tick card__tick--bl" data-node-id="I1486:22551;477:11523"></span>
-        <p class="card__overline" data-node-id="I1486:22551;477:11534">Power is the foundation</p>
-        <div class="card__foot" data-node-id="I1486:22551;477:11535">
-          <p class="card__body" data-node-id="I1486:22551;477:11536">Orbital data centers require a fundamentally different approach to energy. We are developing the technology that can provide the power needed to operate them at scale.</p>
-        </div>
-      </article>
-
-      <article class="card" data-card data-node-id="1486:22525">
-        <div class="card__media" data-node-id="I1486:22525;477:11525" aria-hidden="true">
-          <img class="card__picture" src="assets/images/card-orbit.jpg" alt="" width="1800" height="1194" decoding="async">
-        </div>
-        <span class="card__tick card__tick--tl" data-node-id="I1486:22525;477:11517"></span>
-        <span class="card__tick card__tick--tr" data-node-id="I1486:22525;477:11519"></span>
-        <span class="card__tick card__tick--br" data-node-id="I1486:22525;477:11521"></span>
-        <span class="card__tick card__tick--bl" data-node-id="I1486:22525;477:11523"></span>
-        <p class="card__overline" data-node-id="I1486:22525;477:11534">Built for orbit</p>
-        <div class="card__foot" data-node-id="I1486:22525;477:11535">
-          <p class="card__body" data-node-id="I1486:22525;477:11536">Our systems are designed around the unique requirements of space: limited mass, extreme environments, continuous operation and the growing energy demands of orbital computing.</p>
-        </div>
-      </article>
-
-      <!-- The third is the way in. Its picture is the cupola clip's first
-           frame, held still and framed where the design frames that still:
-           the card opens out into the window and only then does it play. -->
+      <!-- The way in, on the left: it is the last to open and the one that
+           dives. Its picture is the cupola clip's first frame, held still and
+           framed where the design frames that still: the card opens out into
+           the window and only then does it play. -->
       <article class="card card--dive" data-card data-node-id="1486:22524">
         <!-- The same move, carried on. The cupola clip runs out partway through
              the section below and this one picks it up on the very next frame
@@ -365,6 +338,36 @@
         </div>
       </article>
 
+      <article class="card" data-card data-node-id="1486:22525">
+        <!-- 477:11525 — the picture, 900 wide whatever the card's width, so
+             opening a card uncovers more of it rather than scaling it -->
+        <div class="card__media" data-node-id="I1486:22525;477:11525" aria-hidden="true">
+          <img class="card__picture" src="assets/images/card-orbit.jpg" alt="" width="1800" height="1194" decoding="async">
+        </div>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22525;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22525;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22525;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22525;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22525;477:11534">Built for orbit</p>
+        <div class="card__foot" data-node-id="I1486:22525;477:11535">
+          <p class="card__body" data-node-id="I1486:22525;477:11536">Our systems are designed around the unique requirements of space: limited mass, extreme environments, continuous operation and the growing energy demands of orbital computing.</p>
+        </div>
+      </article>
+
+      <article class="card" data-card data-node-id="1486:22551">
+        <div class="card__media" data-node-id="I1486:22551;477:11525" aria-hidden="true">
+          <img class="card__picture" src="assets/images/card-power.jpg" alt="" width="2000" height="1116" decoding="async">
+        </div>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22551;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22551;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22551;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22551;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22551;477:11534">Power is the foundation</p>
+        <div class="card__foot" data-node-id="I1486:22551;477:11535">
+          <p class="card__body" data-node-id="I1486:22551;477:11536">Orbital data centers require a fundamentally different approach to energy. We are developing the technology that can provide the power needed to operate them at scale.</p>
+        </div>
+      </article>
+
     </div>
   </div>
 </section>
@@ -374,13 +377,14 @@
      Figma: "Shot 2 - Outside Spacecraft - Intro" (342:1556) into
      "Shot 3 - Outside Spacecraft - Device" (342:1597).
 
-     The cards above have opened one after another on their way up the
-     window, the third last. As the row comes to rest here, the third card
-     opens out until it fills the window — its own copy fading as it goes — and only once it
-     has does the clip inside it start to run, flying out through the
-     illuminator to the satellite. The intro
-     copy writes itself on the way the tunnel's does; the device copy arrives
-     in the bottom-left once the satellite is all that is left.
+     This section's first stretch belongs to the cards above: it holds their
+     row in view while the open width is handed from right to left, each
+     card standing open long enough to be read. Then the left card opens out
+     until it fills the window — its own copy fading as it goes — and only
+     once it has does the clip inside it start to run, flying out through the
+     illuminator to the satellite. The intro copy writes itself on the way
+     the tunnel's does; the device copy arrives in the bottom-left once the
+     satellite is all that is left.
 
      That clip runs out partway through the section and a second one carries
      the same orbit on from its very next frame, scrubbed by the same scroll.

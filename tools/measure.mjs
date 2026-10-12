@@ -58,22 +58,25 @@ const BOXES = [
   ['339:486', null, 160, null, 252, 'label + heading'],
   ['339:481', null, 160, null, 20, 'label row'],
   ['339:374', null, 204, 843, 208, 'heading'],
-  // 1486:22523 — measured in the state the frame draws, the third card open
+  // 1486:22523 — the frame's three, in the order turned round on request so
+  // the width can open right to left and end on the cupola card, which
+  // dives. Measured where they rest before it does: the left card open at
+  // the frame's 631, the other two folded to the frame's 332.5.
   ['1486:22523', 56, 572, 1328, 558, 'card row'],
-  ['1486:22551', 56, 572, 332.5, 558, 'card 1 (folded)'],
-  ['1486:22525', 404.5, 572, 332.5, 558, 'card 2 (folded)'],
-  ['1486:22524', 753, 572, 631, 558, 'card 3 (open)'],
+  ['1486:22524', 56, 572, 631, 558, 'card: designed to scale (open, left)'],
+  ['1486:22525', 703, 572, 332.5, 558, 'card: built for orbit (folded)'],
+  ['1486:22551', 1051.5, 572, 332.5, 558, 'card: power (folded, right)'],
   // the pictures are 900 wide whatever the card, half a pixel out on the left
-  ['I1486:22551;477:11525', 55.5, 572, 900, 558, 'card 1 picture'],
-  ['I1486:22525;477:11525', 404, 572, 900, 558, 'card 2 picture'],
-  ['I1486:22524;477:11517', 758.5, 577.5, 4, 4, 'card 3 tick, top left'],
-  ['I1486:22524;477:11521', 1374.5, 1120.5, 4, 4, 'card 3 tick, bottom right'],
-  ['I1486:22524;477:11534', 777, 596, 852, 20, 'card 3 overline'],
-  ['I1486:22524;477:11535', 752.5, 854.5, 632, 276, 'card 3 foot'],
+  ['I1486:22525;477:11525', 702.5, 572, 900, 558, 'orbit picture'],
+  ['I1486:22551;477:11525', 1051, 572, 900, 558, 'power picture'],
+  ['I1486:22524;477:11517', 61.5, 577.5, 4, 4, 'open card tick, top left'],
+  ['I1486:22524;477:11521', 677.5, 1120.5, 4, 4, 'open card tick, bottom right'],
+  ['I1486:22524;477:11534', 80, 596, 852, 20, 'open card overline'],
+  ['I1486:22524;477:11535', 55.5, 854.5, 632, 276, 'open card foot'],
   // the foot hangs half a pixel out and pads 24, so the copy stands 23.5 in
   // — the metadata rounds it to 24
-  ['I1486:22524;477:11536', 776.5, 994.5, 556, 112, 'card 3 copy'],
-  ['I1486:22551;477:11536', 79.5, 994.5, 556, 112, 'card 1 copy (cut, not rewrapped)'],
+  ['I1486:22524;477:11536', 79.5, 994.5, 556, 112, 'open card copy'],
+  ['I1486:22551;477:11536', 1075, 994.5, 556, 112, 'power copy (cut, not rewrapped)'],
 
   // --- use cases, 402:2207. Measured with the line landed and the cards on
   // their marks — its characters take up no room until they arrive, and the
@@ -135,8 +138,8 @@ const GAPS = [
   ['356:1235', '356:1236', 16, 'verify: text -> rule'],
   ['339:481', '339:374', 24, 'cards: label -> heading'],
   ['339:374', '1486:22523', 160, 'cards: heading -> row'],
-  ['1486:22551', '1486:22525', 16, 'cards: 1 -> 2'],
-  ['1486:22525', '1486:22524', 16, 'cards: 2 -> 3'],
+  ['1486:22524', '1486:22525', 16, 'cards: left -> middle'],
+  ['1486:22525', '1486:22551', 16, 'cards: middle -> right'],
   ['402:2303', '402:2304', 24, 'use: paragraph -> button'],
   // the two that were asked to match: bar -> label, and line -> answer
   ['356:1237', '438:657', 173, 'faq: bar -> label'],
@@ -157,8 +160,8 @@ await page.goto(target, { waitUntil: 'networkidle' });
 await page.evaluate(() => document.fonts.ready);
 /*
  * The cards rise into place and hand the open width along as they are
- * scrolled to. Parity is about the state the frame draws — the third open —
- * so they are landed in it here rather than scrolled to: the pinned sections
+ * scrolled to. Parity is about where they rest — the left card open, the
+ * frame's widths — so they are landed in it here rather than scrolled to: the pinned sections
  * above them have to stay at the top of their scroll. Clearing what the
  * script wrote leaves the stylesheet's own widths, which are the frame's.
  */
