@@ -172,12 +172,14 @@
    */
   --scene-length-hero: 100vh;
   /*
-   * The flight is two clips end to end: one window of pin, then 420 of
-   * scroll for the cupola leg — what it has always had — and 560 more for
-   * the orbit that carries on from it. js/scene.js splits its progress on
-   * exactly those two lengths, so they have to be changed together.
+   * The flight is the cards opening and then two clips end to end: one
+   * window of pin, 200 of scroll for the cards above to hand their width
+   * along, then 420 for the cupola leg — what it has always had — and 560
+   * more for the orbit that carries on from it. js/scene.js splits its
+   * progress on exactly those three lengths, so they have to be changed
+   * together.
    */
-  --scene-length-flight: 1080vh;
+  --scene-length-flight: 1280vh;
   --scene-length-role: 560vh;
   /*
    * The use section runs a whole sequence rather than one move: the line, the
@@ -1057,7 +1059,9 @@ html.is-held [data-scene='hero'] button {
    ------------------------------------------------------------------------- */
 
 /*
- * 339:343 — 160 down each end, 56 in from each side, 80 between the two blocks.
+ * 339:343 — 160 down each end, 56 in from each side. 160 between the heading
+ * and the cards: the new homepage (1484:6361) gives the heading a block of its
+ * own with 80 under it, and the cards (1486:22522) 80 over them.
  *
  * The section is pulled a window up into the one above it, so the last stretch
  * of that section's scroll rides this one up over its pinned stage rather than
@@ -1072,7 +1076,7 @@ html.is-held [data-scene='hero'] button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 80px;
+  gap: 160px;
   padding: 160px 56px;
   background: #030303;
   overflow: hidden;
@@ -1182,27 +1186,50 @@ html.is-held [data-scene='hero'] button {
   color: transparent;
 }
 
-/* 339:353 — 600 tall, 8 apart, on the section's full width */
+/*
+ * The row's place in the page. The row itself is lifted out and held still
+ * while the cards open — js/scene.js fixes it to the window — and this keeps
+ * the section the height it was, so nothing below moves when it goes.
+ */
+.cards__track {
+  position: relative;
+  width: 100%;
+  height: 558px;
+}
+
+/* 1486:22523 — 558 tall, 16 apart, on the section's full width */
 .cards__row {
   position: relative;
   display: flex;
-  gap: 8px;
+  gap: 16px;
   width: 100%;
-  height: 600px;
+  height: 100%;
+}
+
+/* Held: js/scene.js gives it the place the track has in the window. */
+.cards__row.is-held {
+  position: fixed;
+  height: 558px;
 }
 
 /*
- * 339:354 / 339:365 — #070707 inside a #292929 hairline. The hairline is an
- * inset shadow rather than a border so that everything placed inside is
- * positioned against the card's own edge, and each offset below can be the
- * design's number verbatim — a border would move the containing block in by a
- * pixel and put every one of them out.
+ * 1486:22551 / 22525 / 22524 — black inside a #262626 hairline, 24 of air
+ * all round. The hairline is drawn in an ::after rather than as a border so
+ * that everything inside is placed against the card's own edge, and each
+ * offset below can be the design's number verbatim — a border would move the
+ * containing block in by a pixel and put every one of them out.
+ *
+ * The widths are the frame's: the open card 631, the other two sharing what
+ * is left. js/scene.js takes them over to hand the open one along; this is
+ * where they rest, and what stands with no script or with motion reduced.
  */
 .card {
   position: relative;
+  flex: 1 0 0;
+  min-width: 0;
   height: 100%;
   overflow: hidden;
-  background: #070707;
+  background: var(--color-bg);
   /* the rise; js/scene.js releases them one after the other */
   opacity: 0;
   transform: translateY(40px);
@@ -1214,51 +1241,58 @@ html.is-held [data-scene='hero'] button {
   transform: none;
 }
 
+.card--dive {
+  flex: none;
+  width: 631px;
+}
+
 /*
- * The hairline lives in an ::after so it paints over the content. It used to
- * be an inset shadow on the card itself, but a shadow sits under the content —
- * fine while the media stopped short of the edges, invisible once the clip
- * filled the card, which read as the picture spilling out of an unframed box.
+ * The hairline paints over the content, so it frames the picture rather than
+ * sitting under it — the picture runs to the card's edge.
  */
 .card::after {
   content: '';
   position: absolute;
   inset: 0;
-  box-shadow: inset 0 0 0 1px #292929;
+  box-shadow: inset 0 0 0 1px #262626;
   pointer-events: none;
 }
 
 /*
- * 339:354 / 339:365 — the frame draws the pair settled at 915 and 405 of the
- * 1328 the section leaves. They arrive the other way round and trade width as
- * the section comes up the window: the right one gives way while the left is
- * revealed. js/scene.js sets --card-open; the two widths are read off it, so
- * they always sum to the row.
- */
-.card--wide {
-  flex: none;
-  width: calc(405px + 510px * var(--card-open, 1));
-}
-
-.card--narrow {
-  flex: 1 0 0;
-  min-width: 0;
-}
-
-/*
- * 339:355 — the media. The frame draws it as a band 203.5 past each edge at
- * 544:306; the clip that stands in for it fills the card instead, so the
- * cupola reads at the size it is meant to and the copy's gradient foot has
- * something to sit on. `cover` matters: a video defaults to `contain`, which
- * letterboxed it into a black card with nothing in it.
+ * 477:11525 — 900 x 558, half a pixel out past the left edge and on the
+ * middle line. Its width is its own, not the card's: a folded card shows the
+ * left of the picture and opening it uncovers the rest.
  */
 .card__media {
   position: absolute;
-  inset: 0;
+  top: 50%;
+  left: -0.5px;
+  width: 900px;
+  height: 558px;
+  transform: translateY(-50%);
+}
+
+.card__picture {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  background: url('../assets/images/card-partner.png') center / cover no-repeat;
+}
+
+/*
+ * The third card's picture is the cupola clip, framed the way the design
+ * frames the still it opens on: 142.44 x 152.9 of the 900 x 558, set 21.22
+ * left and 11.46 up of it — which, on the card, is this rectangle. While the
+ * card opens out into the window js/scene.js carries it from here to covering
+ * whatever size the card has reached.
+ */
+.card__clip {
+  position: absolute;
+  top: -63.95px;
+  left: -191.48px;
+  width: 1281.96px;
+  height: 853.18px;
+  object-fit: cover;
 }
 
 /*
@@ -1266,7 +1300,7 @@ html.is-held [data-scene='hero'] button {
  * own — the frame it opens on is the frame the one above closes on, and
  * black is what shows through anywhere the two do not quite meet.
  */
-.card__media--orbit {
+.card__clip--orbit {
   background: #000;
   /*
    * js/scene.js scales this to take the clip's own pull-back back out of it,
@@ -1276,18 +1310,7 @@ html.is-held [data-scene='hero'] button {
   transform-origin: 62% 53%;
 }
 
-/* 339:372 — 380 square, on the middle line, 139.5 in */
-.card__figure {
-  position: absolute;
-  top: 50%;
-  left: 139.5px;
-  width: 380px;
-  height: 380px;
-  transform: translateY(-50%);
-  background: url('../assets/images/card.png') center / contain no-repeat;
-}
-
-/* 339:356 etc — a 4px tick 5.5 in from each corner */
+/* 477:11517 etc — a 4px tick 5.5 in from each corner */
 .card__tick {
   position: absolute;
   width: 4px;
@@ -1316,40 +1339,39 @@ html.is-held [data-scene='hero'] button {
 }
 
 /*
- * Everything that makes the card a card goes as it opens out, leaving only the
- * picture — js/scene.js sets the value.
+ * Everything that makes the third card a card goes as it opens out into the
+ * window, leaving only the picture — js/scene.js sets the value.
  */
-.card--wide .card__overline,
-.card--wide .card__foot,
-.card--wide .card__tick,
-.card--wide::after {
+.card--dive .card__overline,
+.card--dive .card__foot,
+.card--dive .card__tick,
+.card--dive::after {
   opacity: var(--card-copy, 1);
 }
 
-/* 339:360 — headline/Overline: Notch Regular 16/20, tracking 0.4, in caps */
+/*
+ * 477:11534 — headline/Overline: Geist Mono 16/20, tracking 0.4, in caps, at
+ * 70%. 852 wide, which no card is: it stands on one line and the card cuts it.
+ */
 .card__overline {
   position: absolute;
-  top: 23.5px;
-  left: 23.5px;
+  top: 24px;
+  left: 24px;
   margin: 0;
-  width: 360px;
+  width: 852px;
   font-family: var(--font-label);
   font-weight: 400;
   font-size: 16px;
   line-height: 20px;
   letter-spacing: 0.4px;
   text-transform: uppercase;
-  color: var(--color-fg);
-}
-
-/* 339:366 */
-.card__overline--dim {
-  opacity: 0.6;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 /*
- * 339:361 — the copy is read out of the card's own colour rising behind it,
- * so the media it sits over never fights it.
+ * 477:11535 — the copy is read out of the card's own black rising behind it,
+ * so the picture it sits over never fights it: 140 of gradient above it, 24
+ * below, 24 in from the left.
  */
 .card__foot {
   position: absolute;
@@ -1358,33 +1380,28 @@ html.is-held [data-scene='hero'] button {
   left: -0.5px;
   display: flex;
   align-items: center;
-  padding: 140px 60px 24px 24px;
-  background: linear-gradient(to bottom, rgba(7, 7, 7, 0) 0%, #070707 76.155%);
+  padding: 140px 320px 24px 24px;
+  background: linear-gradient(to bottom, rgba(3, 3, 3, 0) 0%, var(--color-bg) 76.155%);
 }
 
-/* 339:362 / 339:367 — headline/H5 at 24/32 */
+/*
+ * 477:11536 — headline/H7: Stack Sans Headline 22/28, on 556 whatever the
+ * card's width, so a folded card cuts its lines rather than rewrapping them.
+ */
 .card__body {
   margin: 0;
   /*
-   * None, or the foot's flexbox squeezes this while the card is still folded
-   * — and the block reveal, which measures the real wrap when the card first
-   * comes on, would split it into the squeezed lines rather than these.
+   * None, or the foot's flexbox squeezes this inside a folded card — and the
+   * block reveal, which measures the real wrap when the card first comes on,
+   * would split it into the squeezed lines rather than these.
    */
   flex: none;
-  width: 547px;
+  width: 556px;
   font-family: var(--font-headline);
   font-weight: 400;
-  font-size: 24px;
-  line-height: 32px;
+  font-size: 22px;
+  line-height: 28px;
   color: var(--color-fg);
-}
-
-/* 339:367 — no gradient behind this one, so it is placed directly */
-.card__body--plain {
-  position: absolute;
-  bottom: 23.5px;
-  left: 23.5px;
-  width: 529px;
 }
 
 /* Reduced motion: everything simply stands where it belongs. */

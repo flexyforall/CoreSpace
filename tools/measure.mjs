@@ -51,16 +51,29 @@ const BOXES = [
   ['330:497', 242.5, 297, 955, 264, 'statement'],
 
   // --- cards, 339:343 (measured against the section, which is its own origin)
-  // 160 + [label 20 + 24 + four 52px lines] + 80 + 600 + 160
-  ['339:343', 0, 0, 1440, 1252, 'cards section'],
+  // 160 + [label 20 + 24 + four 52px lines] + 160 + 558 + 160. The 160
+  // between heading and cards is the new homepage's (1484:6361): 80 under
+  // the heading's own block and 80 over the cards' (1486:22522).
+  ['339:343', 0, 0, 1440, 1290, 'cards section'],
   ['339:486', null, 160, null, 252, 'label + heading'],
   ['339:481', null, 160, null, 20, 'label row'],
   ['339:374', null, 204, 843, 208, 'heading'],
-  ['339:353', 56, 492, 1328, 600, 'card row'],
-  ['339:354', 56, 492, 915, 600, 'wide card'],
-  ['339:365', 979, 492, 405, 600, 'narrow card'],
-  ['339:360', 79.5, 515.5, 360, null, 'wide card overline'],
-  ['339:372', 1118.5, 602, 380, 380, 'narrow card figure'],
+  // 1486:22523 — measured in the state the frame draws, the third card open
+  ['1486:22523', 56, 572, 1328, 558, 'card row'],
+  ['1486:22551', 56, 572, 332.5, 558, 'card 1 (folded)'],
+  ['1486:22525', 404.5, 572, 332.5, 558, 'card 2 (folded)'],
+  ['1486:22524', 753, 572, 631, 558, 'card 3 (open)'],
+  // the pictures are 900 wide whatever the card, half a pixel out on the left
+  ['I1486:22551;477:11525', 55.5, 572, 900, 558, 'card 1 picture'],
+  ['I1486:22525;477:11525', 404, 572, 900, 558, 'card 2 picture'],
+  ['I1486:22524;477:11517', 758.5, 577.5, 4, 4, 'card 3 tick, top left'],
+  ['I1486:22524;477:11521', 1374.5, 1120.5, 4, 4, 'card 3 tick, bottom right'],
+  ['I1486:22524;477:11534', 777, 596, 852, 20, 'card 3 overline'],
+  ['I1486:22524;477:11535', 752.5, 854.5, 632, 276, 'card 3 foot'],
+  // the foot hangs half a pixel out and pads 24, so the copy stands 23.5 in
+  // — the metadata rounds it to 24
+  ['I1486:22524;477:11536', 776.5, 994.5, 556, 112, 'card 3 copy'],
+  ['I1486:22551;477:11536', 79.5, 994.5, 556, 112, 'card 1 copy (cut, not rewrapped)'],
 
   // --- use cases, 402:2207. Measured with the line landed and the cards on
   // their marks — its characters take up no room until they arrive, and the
@@ -121,7 +134,9 @@ const GAPS = [
   // 342:1714 -> 342:1715 on the frame, 191 - 175
   ['356:1235', '356:1236', 16, 'verify: text -> rule'],
   ['339:481', '339:374', 24, 'cards: label -> heading'],
-  ['339:354', '339:365', 8, 'cards: wide -> narrow'],
+  ['339:374', '1486:22523', 160, 'cards: heading -> row'],
+  ['1486:22551', '1486:22525', 16, 'cards: 1 -> 2'],
+  ['1486:22525', '1486:22524', 16, 'cards: 2 -> 3'],
   ['402:2303', '402:2304', 24, 'use: paragraph -> button'],
   // the two that were asked to match: bar -> label, and line -> answer
   ['356:1237', '438:657', 173, 'faq: bar -> label'],
@@ -141,14 +156,23 @@ const page = await browser.newPage({ viewport: { width: 1440, height: 810 } });
 await page.goto(target, { waitUntil: 'networkidle' });
 await page.evaluate(() => document.fonts.ready);
 /*
- * The cards rise into place and trade width as they are scrolled to. Parity is
- * about where they come to rest, so they are landed here rather than scrolled
- * to — the pinned sections above them have to stay at the top of their scroll.
+ * The cards rise into place and hand the open width along as they are
+ * scrolled to. Parity is about the state the frame draws — the third open —
+ * so they are landed in it here rather than scrolled to: the pinned sections
+ * above them have to stay at the top of their scroll. Clearing what the
+ * script wrote leaves the stylesheet's own widths, which are the frame's.
  */
 await page.evaluate(() => {
   const row = document.querySelector('[data-card-row]');
-  if (row) row.style.setProperty('--card-open', '1');
+  if (row) {
+    row.classList.remove('is-held');
+    row.removeAttribute('style');
+  }
+  document.querySelectorAll('[data-card], .card__clip').forEach((c) => {
+    c.removeAttribute('style');
+  });
   document.querySelectorAll('[data-card]').forEach((c) => {
+    c.classList.remove('is-opening');
     c.style.transition = 'none';
     c.classList.add('is-in');
   });

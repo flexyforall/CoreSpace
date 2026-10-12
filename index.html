@@ -264,12 +264,15 @@
 
 
 <!-- =====================================================================
-     Figma: "Cards" (339:343) — 1440 wide, on #030303.
+     Figma: "Cards" (339:343) for the heading, and "cards" (1486:22522) for
+     the three cards under it — 1440 wide, on #030303.
 
      Not a pinned scene: it scrolls past normally. The heading fills in
      reading order as it comes up the window — the frame draws it half read,
      which is the state this animates through — and the cards rise into place
-     behind it. See js/scene.js.
+     behind it. Once the row has come up, the section below holds it still
+     while the cards open one after another and the third dives into its
+     clip. See js/scene.js.
      ===================================================================== -->
 <section class="cards" data-cards data-node-id="339:343">
 
@@ -288,52 +291,80 @@
     <p class="cards__headline" data-cards-text data-node-id="339:374">Core Space works alongside operators and platform builders, providing the critical systems they need to deploy, scale and operate in orbit.</p>
   </div>
 
-  <!-- 339:353 — 600 tall, 8 between the two -->
-  <div class="cards__row" data-card-row data-node-id="339:353">
+  <!-- 1486:22523 — three cards, 16 apart, 558 tall. One stands open at 631
+       and the other two share what is left. The copy keeps its own width
+       whatever the card's, so a folded card shows the start of every line
+       rather than rewrapping them.
 
-    <!-- 339:354 — the wide one: a media band across the top, the copy read
-         out of a gradient at the foot -->
-    <article class="card card--wide" data-card data-node-id="339:354">
-      <!-- The same move, carried on. The cupola clip runs out partway through
-           the section below and this one picks it up on the very next frame of
-           the same orbit around the satellite. It sits *under* the first,
-           already decoded and holding its opening frame, so the hand-over is a
-           cut between two frames of one continuous shot rather than a change
-           of picture — see js/scene.js. -->
-      <video class="card__media card__media--orbit" data-flight-orbit muted playsinline preload="auto"
-             poster="assets/videos/video-orbit-poster.jpg">
-        <source src="assets/videos/video-orbit.mp4" type="video/mp4">
-        <source src="assets/videos/video-orbit.webm" type="video/webm">
-      </video>
+       The frame draws the third open, which is where the scroll leaves them:
+       they arrive with the first open, hand the width along one card at a
+       time, and the third then opens out into the window and into its clip.
+       The track holds the row's place in the page while the row itself is
+       lifted out and held still for that — see js/scene.js. -->
+  <div class="cards__track" data-card-track>
+    <div class="cards__row" data-card-row data-node-id="1486:22523">
 
-      <!-- 339:355 — the media band. It is the cupola clip's first frame, held
-           still: the card opens out into it and only then does it play. -->
-      <video class="card__media" data-flight-video muted playsinline preload="auto"
-             poster="assets/videos/video-cupola-poster.jpg" data-node-id="339:355">
-        <source src="assets/videos/video-cupola.mp4" type="video/mp4">
-        <source src="assets/videos/video-cupola.webm" type="video/webm">
-      </video>
-      <span class="card__tick card__tick--tl" data-node-id="339:356"></span>
-      <span class="card__tick card__tick--tr" data-node-id="339:357"></span>
-      <span class="card__tick card__tick--bl" data-node-id="339:363"></span>
-      <span class="card__tick card__tick--br" data-node-id="339:364"></span>
-      <p class="card__overline" data-node-id="339:360">Partner, not competitor</p>
-      <div class="card__foot" data-node-id="339:361">
-        <p class="card__body" data-node-id="339:362">We strengthen the platforms our partners build and operate, without entering their markets or competing with them.</p>
-      </div>
-    </article>
+      <article class="card" data-card data-node-id="1486:22551">
+        <!-- 477:11525 — the picture, 900 wide whatever the card's width, so
+             opening a card uncovers more of it rather than scaling it -->
+        <div class="card__media" data-node-id="I1486:22551;477:11525" aria-hidden="true">
+          <img class="card__picture" src="assets/images/card-power.jpg" alt="" width="2000" height="1116" decoding="async">
+        </div>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22551;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22551;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22551;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22551;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22551;477:11534">Power is the foundation</p>
+        <div class="card__foot" data-node-id="I1486:22551;477:11535">
+          <p class="card__body" data-node-id="I1486:22551;477:11536">Orbital data centers require a fundamentally different approach to energy. We are developing the technology that can provide the power needed to operate them at scale.</p>
+        </div>
+      </article>
 
-    <!-- 339:365 — the narrow one: a square of media on the middle line -->
-    <article class="card card--narrow" data-card data-node-id="339:365">
-      <div class="card__figure" data-node-id="339:372" aria-hidden="true"></div>
-      <span class="card__tick card__tick--tl" data-node-id="339:368"></span>
-      <span class="card__tick card__tick--tr" data-node-id="339:369"></span>
-      <span class="card__tick card__tick--bl" data-node-id="339:370"></span>
-      <span class="card__tick card__tick--br" data-node-id="339:371"></span>
-      <p class="card__overline card__overline--dim" data-node-id="339:366">Designed to integrate and scale</p>
-      <p class="card__body card__body--plain" data-node-id="339:367">Modular systems designed for existing and next-generation platforms, from deployment to long-term operations.</p>
-    </article>
+      <article class="card" data-card data-node-id="1486:22525">
+        <div class="card__media" data-node-id="I1486:22525;477:11525" aria-hidden="true">
+          <img class="card__picture" src="assets/images/card-orbit.jpg" alt="" width="1800" height="1194" decoding="async">
+        </div>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22525;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22525;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22525;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22525;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22525;477:11534">Built for orbit</p>
+        <div class="card__foot" data-node-id="I1486:22525;477:11535">
+          <p class="card__body" data-node-id="I1486:22525;477:11536">Our systems are designed around the unique requirements of space: limited mass, extreme environments, continuous operation and the growing energy demands of orbital computing.</p>
+        </div>
+      </article>
 
+      <!-- The third is the way in. Its picture is the cupola clip's first
+           frame, held still and framed where the design frames that still:
+           the card opens out into the window and only then does it play. -->
+      <article class="card card--dive" data-card data-node-id="1486:22524">
+        <!-- The same move, carried on. The cupola clip runs out partway through
+             the section below and this one picks it up on the very next frame
+             of the same orbit around the satellite. It sits *under* the first,
+             already decoded and holding its opening frame, so the hand-over is
+             a cut between two frames of one continuous shot rather than a
+             change of picture. -->
+        <video class="card__clip card__clip--orbit" data-flight-orbit muted playsinline preload="auto"
+               poster="assets/videos/video-orbit-poster.jpg">
+          <source src="assets/videos/video-orbit.mp4" type="video/mp4">
+          <source src="assets/videos/video-orbit.webm" type="video/webm">
+        </video>
+        <video class="card__clip" data-flight-video muted playsinline preload="auto"
+               poster="assets/videos/video-cupola-poster.jpg">
+          <source src="assets/videos/video-cupola.mp4" type="video/mp4">
+          <source src="assets/videos/video-cupola.webm" type="video/webm">
+        </video>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22524;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22524;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22524;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22524;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22524;477:11534">Designed to scale</p>
+        <div class="card__foot" data-node-id="I1486:22524;477:11535">
+          <p class="card__body" data-node-id="I1486:22524;477:11536">We are building a technology platform that can support the evolution of orbital infrastructure—from early deployments to large-scale data centers in space.</p>
+        </div>
+      </article>
+
+    </div>
   </div>
 </section>
 
@@ -342,9 +373,11 @@
      Figma: "Shot 2 - Outside Spacecraft - Intro" (342:1556) into
      "Shot 3 - Outside Spacecraft - Device" (342:1597).
 
-     The wide card above opens out until it fills the window — its own copy
-     fading as it goes — and only once it has does the clip inside it start
-     to run, flying out through the illuminator to the satellite. The intro
+     This section's first stretch belongs to the cards above: it holds their
+     row still while each opens in turn. Then the third card opens out until
+     it fills the window — its own copy fading as it goes — and only once it
+     has does the clip inside it start to run, flying out through the
+     illuminator to the satellite. The intro
      copy writes itself on the way the tunnel's does; the device copy arrives
      in the bottom-left once the satellite is all that is left.
 

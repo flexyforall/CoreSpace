@@ -119,13 +119,19 @@
   /* The cards section is not pinned; these are fractions of the window. */
   var CARDS_FILL_FROM = 0.92; // the heading starts filling as it enters...
   var CARDS_FILL_BY = 0.16; // ...and is only fully read once it is near the top
-  var CARDS_RISE_FROM = 0.92; // a card rises as its top reaches here
-  var CARDS_RISE_BY = 0.8;
-  var CARDS_OPEN_FROM = 0.9; // the pair start trading width here...
-  var CARDS_OPEN_BY = 0.3; // ...and have settled on the frame's split by here
+  var CARDS_RISE_FROM = 0.92; // the first card rises as its top reaches here...
+  var CARDS_RISE_STEP = 0.1; // ...and each after it this much further up
 
-  var CARD_WIDE = 915; // the frame's split, and the gap between the pair
-  var CARD_GAP = 8;
+  var CARD_OPEN = 631; // 1486:22522 — the open card's width...
+  var CARD_GAP = 16; // ...and the air between each card
+  /*
+   * The third card's picture rests where the design frames the still it
+   * opens on, on the card's own corner — the same rectangle .card__clip
+   * puts it in. Opening out into the window carries it from here to covering
+   * the card.
+   */
+  var CLIP_REST = { x: -191.48, y: -63.95, w: 1281.96, h: 853.18 };
+  var CLIP_ASPECT = 3256 / 2160; // the clip's own, until it reports it
 
   var REVEAL_MS = 950; // one line's wipe — unhurried enough to be watched
   var REVEAL_STAGGER = 220; // ms between lines setting off
@@ -136,18 +142,30 @@
   var EXIT_STAGGER = 0.12;
 
   /*
-   * Outside the spacecraft. The section runs two clips end to end, so its
-   * scroll is read as two legs and every fraction below is a fraction of
-   * whichever leg it belongs to rather than of the section.
+   * Outside the spacecraft. The section first holds the cards above still
+   * while they open one after another, then runs two clips end to end — so
+   * its scroll is read as three legs, and every fraction below is a fraction
+   * of whichever leg it belongs to rather than of the section.
    *
-   * The lengths are the ones --scene-length-flight is built out of: the
-   * cupola leg keeps the 420 of scroll it has always had, and the orbit that
-   * carries on from it is given 560 more. Changing either means changing that
-   * custom property to match.
+   * The lengths are the ones --scene-length-flight is built out of: the cards
+   * are given 200 of scroll, the cupola leg keeps the 420 it has always had,
+   * and the orbit that carries on from it 560 more. Changing any of them
+   * means changing that custom property to match.
    */
+  var FLIGHT_CARDS_VH = 200;
   var FLIGHT_CUPOLA_VH = 420;
   var FLIGHT_ORBIT_VH = 560;
+  var FLIGHT_CARDS_SPLIT =
+    FLIGHT_CARDS_VH / (FLIGHT_CARDS_VH + FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
+  /* The two clips' split, as a share of what is left after the cards. */
   var FLIGHT_SPLIT = FLIGHT_CUPOLA_VH / (FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
+  /*
+   * Fractions of the cards' leg. The first card is open as the row arrives;
+   * each hand-along is a move between two holds, so every card stands open
+   * long enough to be read before the next takes its width.
+   */
+  var CARDS_TO_SECOND = [0.15, 0.4];
+  var CARDS_TO_THIRD = [0.6, 0.85];
   /*
    * The scroll the hand-over is dissolved across. The cupola clip's last
    * frame and the orbit clip's first are the same moment of the same move,
@@ -230,7 +248,7 @@
 
   /* Fractions of the cupola leg's own scroll. */
   var FLIGHT_PREROLL = 1.2; // seconds the clip creeps through while the card scales
-  var FLIGHT_WIDEN_BY = 0.09; // the card has widened across both by here...
+  var FLIGHT_WIDEN_BY = 0.09; // the third card has taken the whole row by here...
   var FLIGHT_OPEN_BY = 0.24; // ...and has taken the whole window by here
   /*
    * ...and the cupola clip has run to its end by here — the end of its own
@@ -1306,8 +1324,9 @@
    *
    * The heading fills in reading order, which is the state 339:374 is drawn
    * in: read characters go transparent and let the paragraph's gradient
-   * through, the rest keep their 20%. The cards rise as they arrive, the wide
-   * one a beat before the narrow one.
+   * through, the rest keep their 20%. The cards rise as they arrive, each a
+   * beat after the one before. Which of them stands open is the flight's to
+   * decide — it holds the row still for that — so none of it is here.
    */
   function setUpCards() {
     var section = document.querySelector('[data-cards]');
@@ -1315,7 +1334,7 @@
 
     var heading = section.querySelector('[data-cards-text]');
     var cards = section.querySelectorAll('[data-card]');
-    var row = section.querySelector('[data-card-row]');
+    var track = section.querySelector('[data-card-track]');
     var cardOn = [];
     var cardLines = [];
     if (!heading) return;
@@ -1327,9 +1346,6 @@
       return;
     }
 
-    /* They start the other way round, and open as the row is scrolled to. */
-    if (row) row.style.setProperty('--card-open', '0');
-
     register(function () {
       var fill = progressUp(heading, CARDS_FILL_FROM, CARDS_FILL_BY);
       var read = Math.round(fill * letters.length);
@@ -1338,13 +1354,19 @@
         if (letters[i].className !== want) letters[i].className = want;
       }
 
+      /*
+       * Read off the track, which stands where the cards do but never moves
+       * with them: a card's own rect carries the 40px it rises through, and
+       * once the row is held still it says nothing about the scroll at all.
+       */
+      var rowTop = track ? track.getBoundingClientRect().top : 0;
       for (var c = 0; c < cards.length; c++) {
         /*
-         * Each card waits its turn: the second is a tenth of a window later.
+         * Each card waits its turn, a tenth of a window after the one before.
          * As one comes on, its copy is wiped in by the block reveal — and
          * reset on the way back out, so scrolling through again replays it.
          */
-        var on = progressUp(cards[c], CARDS_RISE_FROM - c * 0.1, CARDS_RISE_BY) > 0;
+        var on = rowTop < window.innerHeight * (CARDS_RISE_FROM - c * CARDS_RISE_STEP);
         if (on !== cardOn[c]) {
           cardOn[c] = on;
           cards[c].classList.toggle('is-in', on);
@@ -1362,17 +1384,6 @@
           }
         }
       }
-
-      /*
-       * The pair trade width as the row comes up: the right one gives way while
-       * the left is revealed, settling on the frame's 915 / 405.
-       */
-      if (row) {
-        row.style.setProperty(
-          '--card-open',
-          progressUp(row, CARDS_OPEN_FROM, CARDS_OPEN_BY).toFixed(4)
-        );
-      }
     });
   }
 
@@ -1381,39 +1392,67 @@
    * ------------------------------------------------------------------ */
 
   /*
-   * The wide card above opens out until it fills the window, and only then
-   * does the clip inside it start to run.
+   * The cards above are held still while each opens in turn; then the third
+   * opens out until it fills the window, and only then does the clip inside
+   * it start to run.
    *
-   * Growing it means taking it out of the card, so over that stretch the box
-   * is fixed and its rect is interpolated from wherever the card has it to the
-   * whole window. The card's own rect is read every frame rather than captured
-   * once, so arriving at any scroll position lands on the right box.
+   * Holding them means taking the row out of the page, so over that stretch
+   * it is fixed where it stood, and growing the third means taking it out of
+   * the row in turn: its rect is interpolated from the whole row to the whole
+   * window. Every rect is worked out afresh each frame rather than captured
+   * once, so arriving at any scroll position lands on the right boxes.
    */
+
+  /* Slow out of one hold and into the next, with no corner at either end. */
+  function smooth(k) {
+    return k * k * (3 - 2 * k);
+  }
+
   /*
-   * The narrow card folds as the wide one takes the row: pinned to the row's
-   * right edge, it gives up exactly the width the wide one gains — their
-   * facing edges close on the 8px gap — until nothing of it is left. It never
-   * simply stands behind the widening card.
+   * The three cards' widths across a row `row` wide.
    *
-   * It folds in the same frozen frame the wide card grows in. Left in the
-   * page it would go on scrolling up while the wide card held still, and the
-   * pair's edges would drift apart mid-fold.
+   * `open` is which card stands open — 0, 1 or 2, and in between while one
+   * hands its width to the next. Each card's share of the open width falls
+   * away linearly either side of its own number, so the shares always add up
+   * to exactly one open card and the row never changes length while the
+   * width moves along it.
+   *
+   * `take` is the third card taking the whole row on its way into the window:
+   * the other two and the air between them close up together, and the third
+   * gains exactly what they give, so its left edge sweeps over to the row's.
    */
-  function foldNarrow(row, frozen) {
-    var narrow = row.querySelector('.card--narrow');
-    if (!narrow) return;
-    if (!frozen) {
-      narrow.classList.remove('is-opening');
-      narrow.style.cssText = '';
-      return;
+  function cardWidths(row, open, take) {
+    var shut = (row - CARD_OPEN - 2 * CARD_GAP) / 2;
+    var out = [];
+    for (var i = 0; i < 2; i++) {
+      var share = Math.max(0, 1 - Math.abs(open - i));
+      out.push((shut + (CARD_OPEN - shut) * share) * (1 - take));
     }
-    var w = Math.max(0, frozen.rowWidth - frozen.ww - CARD_GAP);
-    narrow.classList.add('is-opening');
-    narrow.style.left = (frozen.x0 + frozen.rowWidth - w).toFixed(1) + 'px';
-    /* The wide card's own box, so the pair share top and height throughout. */
-    narrow.style.top = frozen.y.toFixed(1) + 'px';
-    narrow.style.width = w.toFixed(1) + 'px';
-    narrow.style.height = frozen.h.toFixed(1) + 'px';
+    var gap = CARD_GAP * (1 - take);
+    out.push(row - out[0] - out[1] - 2 * gap);
+    return { widths: out, gap: gap };
+  }
+
+  /* The rectangle a picture of `aspect` takes to cover a `w` x `h` box. */
+  function coverRect(w, h, aspect) {
+    if (w / h > aspect) return { x: 0, y: (h - w / aspect) / 2, w: w, h: w / aspect };
+    return { x: (w - h * aspect) / 2, y: 0, w: h * aspect, h: h };
+  }
+
+  /* Writes a box only where it has changed, so a still frame costs nothing. */
+  function place(el, box) {
+    var l = box.x.toFixed(1) + 'px';
+    var t = box.y.toFixed(1) + 'px';
+    var w = box.w.toFixed(1) + 'px';
+    var h = box.h.toFixed(1) + 'px';
+    if (el.style.left !== l) el.style.left = l;
+    if (el.style.top !== t) el.style.top = t;
+    if (el.style.width !== w) el.style.width = w;
+    if (el.style.height !== h) el.style.height = h;
+  }
+
+  function unplace(el) {
+    el.style.left = el.style.top = el.style.width = el.style.height = '';
   }
 
   /*
@@ -1443,6 +1482,9 @@
     var card = video ? video.closest('[data-card]') : null;
     var orbit = card ? card.querySelector('[data-flight-orbit]') : null;
     var row = card ? card.closest('[data-card-row]') : null;
+    var track = row ? row.closest('[data-card-track]') : null;
+    var cards = row ? [].slice.call(row.querySelectorAll('[data-card]')) : [];
+    var clips = card ? [].slice.call(card.querySelectorAll('.card__clip')) : [];
     var intro = scene.querySelector('[data-flight-intro]');
     var introLabel = scene.querySelector('.flight__label');
     var heading = scene.querySelector('[data-flight-text]');
@@ -1450,7 +1492,7 @@
     var pointTitle = scene.querySelector('[data-flight-point-title]');
     var pointBody = scene.querySelector('[data-flight-point-body]');
     var point = -1;
-    if (!video || !card || !heading) return;
+    if (!video || !card || !heading || !track) return;
 
     var letters = splitCharacters(heading);
     var seek = seeker(video);
@@ -1484,33 +1526,35 @@
     }
 
     register(function () {
-      var p = progressOf(scene);
+      var whole = progressOf(scene);
       /*
-       * Two clips, one move. The section's scroll is split at the frame the
-       * cupola clip runs out on: everything the first leg does is read off
-       * `p` rescaled to its own length, and the orbit that carries the shot
-       * on is read off what is left. Both are clamped, so the first leg
-       * simply holds at its end while the second runs.
+       * Three legs. The first is the cards': it holds their row still and
+       * hands the open width along it. What is left is the move this section
+       * has always made, and is read as `p` exactly as the whole section was
+       * before the cards were given their stretch — so nothing that reads it
+       * below has had to change.
+       */
+      var pk = clamp01(whole / FLIGHT_CARDS_SPLIT);
+      var p = clamp01((whole - FLIGHT_CARDS_SPLIT) / (1 - FLIGHT_CARDS_SPLIT));
+      /*
+       * Two clips, one move. That remainder is split at the frame the cupola
+       * clip runs out on: everything the first leg does is read off `p`
+       * rescaled to its own length, and the orbit that carries the shot on is
+       * read off what is left. Both are clamped, so the first leg simply
+       * holds at its end while the second runs.
        */
       var pc = clamp01(p / FLIGHT_SPLIT);
       var po = clamp01((p - FLIGHT_SPLIT) / (1 - FLIGHT_SPLIT));
 
       /*
-       * The card opens out in two moves, and it is the whole card that moves —
-       * frame, ticks and copy together, with the clip filling it throughout.
+       * The third card opens out in two moves, and it is the whole card that
+       * moves — frame, ticks and copy together, with the clip filling it.
        *
-       *   first   it widens across the space both cards held, keeping its own
-       *           height and its place in the row
+       *   first   it takes the whole row, the other two and the air between
+       *           them closing up as it does, keeping its height and its place
        *   then    it carries on into the window, and its copy fades as it goes
        *           so that by the time the clip has the screen nothing is left
        *           of the card but the picture
-       *
-       * Both moves grow from where the card stood when the scene began, not
-       * from where it is now: the row goes on scrolling away underneath while
-       * this lifts out of it, and tracking it instead drags the box up off the
-       * screen. That start is recovered rather than captured — the scene's own
-       * top is how far the scroll has come into it, so adding it back to the
-       * card's current top gives where it stood at zero.
        */
       var widen = clamp01(pc / FLIGHT_WIDEN_BY);
       var zoom = clamp01((pc - FLIGHT_WIDEN_BY) / (FLIGHT_OPEN_BY - FLIGHT_WIDEN_BY));
@@ -1523,60 +1567,105 @@
        * leaving the copy to travel up alone.
        */
       var away = Math.min(0, scene.getBoundingClientRect().bottom - window.innerHeight);
-
       var open = pc >= FLIGHT_OPEN_BY ? 1 : 0;
+      var vw = window.innerWidth;
+      var vh = window.innerHeight;
+      var aspect = video.videoWidth ? video.videoWidth / video.videoHeight : CLIP_ASPECT;
 
-      if (pc > 0 && pc < FLIGHT_OPEN_BY && row) {
-        var into = scene.getBoundingClientRect().top;
-        /*
-         * Measured off the row, never off the card: the card is fixed by the
-         * time this runs a second time, so its own rect would be reporting
-         * back the position this very code just gave it. The row stays in the
-         * page and keeps telling the truth.
-         */
-        var rowBox = row.getBoundingClientRect();
-        var x0 = rowBox.left;
-        var y0 = rowBox.top - into;
-        var h0 = rowBox.height;
-        /* From the card's own share of the row to the whole of it. */
-        var ww = CARD_WIDE + (rowBox.width - CARD_WIDE) * widen;
-        var wx = x0;
-        var vw = window.innerWidth;
-        var vh = window.innerHeight;
+      /*
+       * Which card stands open: the first as the row arrives, and the width
+       * handed along to the second and then the third over the cards' leg.
+       */
+      var which =
+        smooth(clamp01((pk - CARDS_TO_SECOND[0]) / (CARDS_TO_SECOND[1] - CARDS_TO_SECOND[0]))) +
+        smooth(clamp01((pk - CARDS_TO_THIRD[0]) / (CARDS_TO_THIRD[1] - CARDS_TO_THIRD[0])));
 
-        card.classList.add('is-opening');
-        foldNarrow(row, {
-          x0: x0,
-          y: y0 * (1 - zoom),
-          h: h0 + (vh - h0) * zoom,
-          ww: ww,
-          rowWidth: rowBox.width,
-        });
-        card.style.left = (wx * (1 - zoom)).toFixed(1) + 'px';
-        card.style.top = (y0 * (1 - zoom)).toFixed(1) + 'px';
-        card.style.width = (ww + (vw - ww) * zoom).toFixed(1) + 'px';
-        card.style.height = (h0 + (vh - h0) * zoom).toFixed(1) + 'px';
-      } else if (open) {
-        card.classList.add('is-opening');
-        if (row) {
-          var rb = row.getBoundingClientRect();
-          foldNarrow(row, {
-            x0: rb.left,
-            y: away,
-            h: window.innerHeight,
-            ww: rb.width,
-            rowWidth: rb.width,
-          });
+      /*
+       * Measured off the track, never off the row: the row is fixed by the
+       * time this runs a second time, so its own rect would be reporting back
+       * the position this very code just gave it. The track stays in the page
+       * and keeps telling the truth.
+       *
+       * Everything here happens where the row stood when the scene began, not
+       * where the track is now: the page goes on scrolling underneath while
+       * the row is held, and following it would drag the cards up off the
+       * screen. That start is recovered rather than captured — the scene's own
+       * top is how far the scroll has come into it, so adding it back to the
+       * track's current top gives where it stood at zero.
+       */
+      var tb = track.getBoundingClientRect();
+      var x0 = tb.left;
+      var y0 = tb.top - scene.getBoundingClientRect().top;
+      var h0 = tb.height;
+      var share = cardWidths(tb.width, which, widen);
+
+      if (whole > 0) {
+        row.classList.add('is-held');
+        place(row, { x: x0, y: y0, w: tb.width, h: h0 });
+      } else {
+        row.classList.remove('is-held');
+        unplace(row);
+      }
+      var gap = share.gap.toFixed(1) + 'px';
+      if (row.style.gap !== gap) row.style.gap = gap;
+
+      for (var c = 0; c < cards.length; c++) {
+        var w = share.widths[c];
+        var flat = w.toFixed(1) + 'px';
+        if (cards[c].style.flex !== '0 0 auto') cards[c].style.flex = 'none';
+        if (cards[c] !== card || (!zoom && !open)) {
+          if (cards[c].style.width !== flat) cards[c].style.width = flat;
         }
-        card.style.left = '0px';
-        card.style.top = away.toFixed(1) + 'px';
-        card.style.width = '100%';
-        card.style.height = '100%';
+        /* A card closed right up would still draw its hairline. */
+        var gone = w < 0.5 ? 'hidden' : '';
+        if (cards[c].style.visibility !== gone) cards[c].style.visibility = gone;
+      }
+
+      /*
+       * The third card, and the clip inside it. In the row the card is sized
+       * with the others and the clip carried from the design's framing to
+       * covering the card over the same move that has the card take the row —
+       * at every step of it the picture still reaches the card's far edge.
+       * From there the card leaves the row for the window and the clip simply
+       * covers whatever size it has reached.
+       */
+      var box;
+      if (zoom > 0 && !open) {
+        box = {
+          x: x0 * (1 - zoom),
+          y: y0 * (1 - zoom),
+          w: tb.width + (vw - tb.width) * zoom,
+          h: h0 + (vh - h0) * zoom,
+        };
+        card.classList.add('is-opening');
+        place(card, box);
+      } else if (open) {
+        box = { x: 0, y: away, w: vw, h: vh };
+        card.classList.add('is-opening');
+        place(card, box);
       } else {
         card.classList.remove('is-opening');
-        card.style.cssText = '';
-        if (row) foldNarrow(row, null);
+        card.style.left = card.style.top = card.style.height = '';
+        /*
+         * Aimed at covering the whole row, where the card is going, not at
+         * the width it has reached: a target that grows with the card trails
+         * it, and left the picture's right edge short of the card's by as
+         * much as 20px partway over. Aimed at the end, the picture's edge
+         * keeps ahead of the card's the whole way and meets it on arrival.
+         */
+        box = { w: tb.width, h: h0 };
       }
+
+      var cover = coverRect(box.w, box.h, aspect);
+      var t = zoom > 0 || open ? 1 : widen;
+      var clip = {
+        x: CLIP_REST.x + (cover.x - CLIP_REST.x) * t,
+        y: CLIP_REST.y + (cover.y - CLIP_REST.y) * t,
+        w: CLIP_REST.w + (cover.w - CLIP_REST.w) * t,
+        h: CLIP_REST.h + (cover.h - CLIP_REST.h) * t,
+      };
+      for (var k = 0; k < clips.length; k++) place(clips[k], clip);
+
       /* The copy goes over the second move only, and is gone by the end of it. */
       card.style.setProperty('--card-copy', String(1 - zoom));
 
