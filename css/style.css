@@ -173,7 +173,7 @@
   --scene-length-hero: 100vh;
   /*
    * The flight is the cards opening and then two clips end to end: one
-   * window of pin, 160 of scroll for the cards above to hand their width
+   * window of pin, 160 of scroll for the cards above to pass their width
    * leftwards with each of them read, then 420 for the cupola leg — what it
    * has always had — and 560 more for the orbit that carries on from it.
    * js/scene.js splits its progress on exactly those three lengths, so they

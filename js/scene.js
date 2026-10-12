@@ -160,15 +160,22 @@
   /* The two clips' split, as a share of what is left after the cards. */
   var FLIGHT_SPLIT = FLIGHT_CUPOLA_VH / (FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
   /*
-   * Fractions of the cards' leg. The width opens right to left: the right
-   * card is open as the row comes up and rests — its copy is in view for the
-   * last stretch of the way and for the first beat here — then it is handed
-   * to the middle card and on to the left, the one that dives. Each move
-   * sits between two holds, so every card stands open, copy and all, long
-   * enough to be read before the next takes its width.
+   * The cards never stand still, as the pair never did. They come up the
+   * window three equal and the right one opens as they rise — read off the
+   * row's way up, as the pair's trade was, from its top passing this share
+   * of the window to the row coming to rest, where it is fully open. The
+   * whole window: from the first pixel of the row there is something moving.
    */
-  var CARDS_TO_MIDDLE = [0.12, 0.4];
-  var CARDS_TO_LEFT = [0.58, 0.86];
+  var CARDS_LIFT_FROM = 1;
+  /*
+   * Then, held in view over the cards' leg, the open width flows on right to
+   * left without stopping. Not at an even pace: it slows as each card comes
+   * fully open, so its copy can be read, and makes the ground up in between —
+   * the speed swings this far either side of even, and never to nothing. The
+   * moves used to be eased into the gaps between flat holds, which had them
+   * standing and then going five times as fast as this ever does.
+   */
+  var CARDS_LINGER = 0.6;
   /*
    * The scroll the hand-over is dissolved across. The cupola clip's last
    * frame and the orbit clip's first are the same moment of the same move,
@@ -1396,7 +1403,7 @@
 
   /*
    * The cards above come to rest with the right-hand one open, and are held
-   * in view while the open width is handed leftwards; then the left one
+   * in view while the open width flows on leftwards; then the left one
    * opens out until it fills the window, and only then does the clip inside
    * it start to run.
    *
@@ -1407,11 +1414,6 @@
    * once, so arriving at any scroll position lands on the right boxes.
    */
 
-  /* Slow out of one hold and into the next, with no corner at either end. */
-  function smooth(k) {
-    return k * k * (3 - 2 * k);
-  }
-
   /*
    * The cards' widths across a row `row` wide.
    *
@@ -1421,12 +1423,17 @@
    * to exactly one open card and the row never changes length while the
    * width moves along it.
    *
+   * `lift` is how open that card is: at nothing the cards stand equal, and
+   * the open one swells out of them. Both ends sum to the same row, so
+   * nothing in between changes its length either.
+   *
    * `take` is card `dive` taking the whole row on its way into the window:
    * the others and the air between them close up together, and it gains
    * exactly what they give, so its far edge sweeps over to the row's.
    */
-  function cardWidths(row, count, open, take, dive) {
+  function cardWidths(row, count, open, lift, take, dive) {
     var shut = (row - CARD_OPEN - (count - 1) * CARD_GAP) / (count - 1);
+    var even = (row - (count - 1) * CARD_GAP) / count;
     var gap = CARD_GAP * (1 - take);
     var out = [];
     var rest = row - (count - 1) * gap;
@@ -1436,7 +1443,8 @@
         continue;
       }
       var share = Math.max(0, 1 - Math.abs(open - i));
-      var w = (shut + (CARD_OPEN - shut) * share) * (1 - take);
+      var settled = shut + (CARD_OPEN - shut) * share;
+      var w = (even + (settled - even) * lift) * (1 - take);
       /*
        * Too thin to draw — and hidden for it — a closing card's last sliver
        * goes to the one opening rather than standing as a gap at the row's
@@ -1499,6 +1507,7 @@
     var orbit = card ? card.querySelector('[data-flight-orbit]') : null;
     var row = card ? card.closest('[data-card-row]') : null;
     var track = row ? row.closest('[data-card-track]') : null;
+    var stand = track ? track.closest('[data-cards]') : null;
     var cards = row ? [].slice.call(row.querySelectorAll('[data-card]')) : [];
     var clips = card ? [].slice.call(card.querySelectorAll('.card__clip')) : [];
     var intro = scene.querySelector('[data-flight-intro]');
@@ -1508,7 +1517,7 @@
     var pointTitle = scene.querySelector('[data-flight-point-title]');
     var pointBody = scene.querySelector('[data-flight-point-body]');
     var point = -1;
-    if (!video || !card || !heading || !track) return;
+    if (!video || !card || !heading || !track || !stand) return;
 
     var letters = splitCharacters(heading);
     var seek = seeker(video);
@@ -1609,16 +1618,28 @@
       var h0 = tb.height;
 
       /*
-       * Which card stands open, right to left: the right-hand one as the row
-       * arrives and rests, then the middle, then the left — the one that
-       * dives — over the cards' leg.
+       * How open the right-hand card is, read off the row's way up: from its
+       * top passing CARDS_LIFT_FROM to where it rests as this section pins —
+       * the cards section's foot level with the window's, which leaves the
+       * row that section's 160 and its own 558 above it, whatever the
+       * window's height. The track is in the page throughout, so that
+       * distance is always the same; once the row is held the track goes on
+       * up past its rest and the reading simply stays full.
+       */
+      var restTop = vh - (stand.getBoundingClientRect().bottom - tb.top);
+      var liftFrom = vh * CARDS_LIFT_FROM;
+      var lift = clamp01((liftFrom - tb.top) / (liftFrom - restTop));
+      /*
+       * Which card stands open, right to left over the cards' leg: the
+       * right-hand one as the row comes to rest, then the middle, then the
+       * left — the one that dives. One unbroken flow, slowed as it passes
+       * each card so the card can be read and quickened between them; the
+       * sine is nothing at every whole card, so each still lands exactly.
        */
       var last = cards.length - 1;
-      var which =
-        last -
-        smooth(clamp01((pk - CARDS_TO_MIDDLE[0]) / (CARDS_TO_MIDDLE[1] - CARDS_TO_MIDDLE[0]))) -
-        smooth(clamp01((pk - CARDS_TO_LEFT[0]) / (CARDS_TO_LEFT[1] - CARDS_TO_LEFT[0])));
-      var share = cardWidths(tb.width, cards.length, which, widen, cards.indexOf(card));
+      var flow = last * pk;
+      var which = last - (flow - (CARDS_LINGER * Math.sin(2 * Math.PI * flow)) / (2 * Math.PI));
+      var share = cardWidths(tb.width, cards.length, which, lift, widen, cards.indexOf(card));
 
       if (whole > 0) {
         row.classList.add('is-held');

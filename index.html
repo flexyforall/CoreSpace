@@ -270,9 +270,9 @@
      Not a pinned scene: it scrolls past normally. The heading fills in
      reading order as it comes up the window — the frame draws it half read,
      which is the state this animates through — and the cards rise into place
-     behind it. The row comes to rest with the right-hand card open, and the
-     section below holds it in view while the width is handed leftwards card
-     by card; then the left card dives into its clip. See js/scene.js.
+     behind it. The right-hand card opens as the row rises; the section
+     below holds the row in view while the open width flows on leftwards,
+     and then the left card dives into its clip. See js/scene.js.
      ===================================================================== -->
 <section class="cards" data-cards data-node-id="339:343">
 
@@ -298,12 +298,12 @@
 
        The width opens right to left, so the frame's order is turned round:
        the cupola card, which opens last and dives, stands on the left. The
-       row comes up the window with the right-hand card open and comes to
-       rest, and the section below holds it in view while the open width is
-       handed leftwards one card at a time, each standing open long enough to
-       be read. Then the left card opens out into the window and into its
-       clip. The track keeps the row's place in the page while it is held —
-       see js/scene.js. -->
+       cards come up the window equal and the right-hand one opens as they
+       rise; once the row is at rest the section below holds it in view and
+       the open width flows on leftwards without stopping, slowing as each
+       card comes fully open so it can be read. Then the left card opens out
+       into the window and into its clip. The track keeps the row's place in
+       the page while it is held — see js/scene.js. -->
   <div class="cards__track" data-card-track>
     <div class="cards__row" data-card-row data-node-id="1486:22523">
 
@@ -378,8 +378,9 @@
      "Shot 3 - Outside Spacecraft - Device" (342:1597).
 
      This section's first stretch belongs to the cards above: it holds their
-     row in view while the open width is handed from right to left, each
-     card standing open long enough to be read. Then the left card opens out
+     row in view while the open width flows on from right to left, slowing
+     as each card comes fully open so it can be read. Then the left card
+     opens out
      until it fills the window — its own copy fading as it goes — and only
      once it has does the clip inside it start to run, flying out through the
      illuminator to the satellite. The intro copy writes itself on the way
