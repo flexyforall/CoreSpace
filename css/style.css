@@ -1406,6 +1406,38 @@ html.is-held [data-scene='hero'] button {
   color: var(--color-fg);
 }
 
+/*
+ * A card's copy stands back until the card is opened, and fills in reading
+ * order as it opens — overline first, then the paragraph line by line. Each
+ * line the reveal has split it into paints its own ink as a gradient clipped
+ * to its text: full up to --fill-at, the inactive ink beyond, with a soft
+ * edge between. js/scene.js sweeps --fill-at through the lines; left to the
+ * default, which is past the end of any line, the copy simply stands full.
+ */
+.card__overline {
+  --ink: rgba(255, 255, 255, 0.7);
+  --ink-dim: rgba(255, 255, 255, 0.21);
+}
+
+.card__body {
+  --ink: var(--color-fg);
+  --ink-dim: rgba(255, 255, 255, 0.3);
+}
+
+.card .rv-text {
+  --fill-at: 9999px;
+  background-image: linear-gradient(
+    90deg,
+    var(--ink) 0,
+    var(--ink) var(--fill-at),
+    var(--ink-dim) calc(var(--fill-at) + 32px),
+    var(--ink-dim) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* Reduced motion: everything simply stands where it belongs. */
 @media (prefers-reduced-motion: reduce) {
   .card {

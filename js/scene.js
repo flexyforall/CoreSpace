@@ -177,6 +177,12 @@
    */
   var CARDS_LINGER = 0.6;
   /*
+   * A card's copy fills in reading order as the card opens, from the
+   * inactive ink to the full — the soft edge between them is this wide, and
+   * is .card .rv-text's 32px in the stylesheet.
+   */
+  var CARD_FILL_EDGE = 32;
+  /*
    * The scroll the hand-over is dissolved across. The cupola clip's last
    * frame and the orbit clip's first are the same moment of the same move,
    * one twenty-fourth of a second apart, so this is not there to hide a cut
@@ -1533,6 +1539,39 @@
     }
 
     /*
+     * A card's copy filling, in reading order: `filled` of the way through
+     * all its lines laid end to end, overline first. Each line runs from its
+     * soft edge wholly before it (all inactive) to wholly past its end (all
+     * full ink), so a line is never half-lit at rest.
+     *
+     * The lines are the ones the block reveal split the copy into as the
+     * card first rose — it keeps the same ones for every replay — and they
+     * are read once they exist. The copy keeps its own width whatever the
+     * card's, so a line's width never changes after.
+     */
+    var copyLines = [];
+    function fillCopy(c, filled) {
+      var lines = copyLines[c];
+      if (!lines) {
+        var texts = cards[c].querySelectorAll('.rv-text');
+        if (!texts.length) return;
+        lines = copyLines[c] = [].map.call(texts, function (el) {
+          return { el: el, w: el.offsetWidth + CARD_FILL_EDGE };
+        });
+        lines.total = lines.reduce(function (sum, l) {
+          return sum + l.w;
+        }, 0);
+      }
+      var reach = filled * lines.total;
+      for (var i = 0; i < lines.length; i++) {
+        var l = lines[i];
+        var at = (clamp01(reach / l.w) * l.w - CARD_FILL_EDGE).toFixed(1) + 'px';
+        if (l.el.style.getPropertyValue('--fill-at') !== at) l.el.style.setProperty('--fill-at', at);
+        reach -= l.w;
+      }
+    }
+
+    /*
      * A point arriving is the block reveal, the same as the one the use
      * cases' foot runs: the copy is written fresh from the table above — a
      * line that has been split no longer has the spaces that were between
@@ -1661,6 +1700,16 @@
         /* A card closed right up would still draw its hairline. */
         var gone = w < 0.5 ? 'hidden' : '';
         if (cards[c].style.visibility !== gone) cards[c].style.visibility = gone;
+
+        /*
+         * How far its copy has filled: a card fills as the open width comes
+         * to it — from the card to its right being open to its own being —
+         * and stays filled once it has been opened, so it is only the cards
+         * still to come that stand back. The right-hand card has no card to
+         * its right; it fills as it swells open on the way up.
+         */
+        var filled = clamp01(c + 1 - which) * (c === last ? lift : 1);
+        fillCopy(c, filled);
       }
 
       /*
