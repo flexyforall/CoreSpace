@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Core Space — cards</title>
+  <!--
+    The homepage's cards section on its own: open this file straight from the
+    repository (double-click works — no build, no server). The pictures,
+    clips and fonts are the repository's own, read from ../../assets/.
+  -->
+  <link rel="stylesheet" href="cards.css">
+</head>
+<body>
+
+<div class="spacer">Scroll</div>
+
+<section class="cards" data-cards data-node-id="339:343">
+
+
+
+  <!-- 339:486 — label and heading, 24 apart -->
+  <div class="cards__head" data-node-id="339:486">
+    <div class="cards__label" data-node-id="339:481">
+      <span class="cards__square" data-node-id="339:482"></span>
+      <span class="cards__labelText" data-node-id="339:484">Our role</span>
+      <span class="cards__square" data-node-id="339:485"></span>
+    </div>
+
+    <p class="cards__headline" data-cards-text data-node-id="339:374">Core Space works alongside operators and platform builders, providing the critical systems they need to deploy, scale and operate in orbit.</p>
+  </div>
+
+  <!-- 1486:22523 — three cards, 16 apart, 558 tall. One stands open at 631
+       and the other two share what is left. The copy keeps its own width
+       whatever the card's, so a folded card shows the start of every line
+       rather than rewrapping them.
+
+       The width opens right to left, so the frame's order is turned round:
+       the cupola card, which opens last and dives, stands on the left. The
+       cards come up the window equal and the right-hand one opens as they
+       rise; once the row is at rest the section below holds it in view and
+       the open width flows on leftwards without stopping, slowing as each
+       card comes fully open so it can be read. Then the left card opens out
+       into the window and into its clip. The track keeps the row's place in
+       the page while it is held — see js/scene.js. -->
+  <div class="cards__track" data-card-track>
+    <div class="cards__row" data-card-row data-node-id="1486:22523">
+
+      <!-- The way in, on the left: it is the last to open and the one that
+           dives. Its picture is the cupola clip's first frame, held still and
+           framed where the design frames that still: the card opens out into
+           the window and only then does it play. (On the homepage a second
+           clip carries the shot on past this one; it is left out here.) -->
+      <article class="card card--dive" data-card data-node-id="1486:22524">
+        <video class="card__clip" data-flight-video muted playsinline preload="auto"
+               poster="../../assets/videos/video-cupola-poster.jpg">
+          <source src="../../assets/videos/video-cupola.mp4" type="video/mp4">
+          <source src="../../assets/videos/video-cupola.webm" type="video/webm">
+        </video>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22524;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22524;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22524;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22524;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22524;477:11534">Designed to scale</p>
+        <div class="card__foot" data-node-id="I1486:22524;477:11535">
+          <p class="card__body" data-node-id="I1486:22524;477:11536">We are building a technology platform that can support the evolution of orbital infrastructure—from early deployments to large-scale data centers in space.</p>
+        </div>
+      </article>
+
+      <article class="card" data-card data-node-id="1486:22525">
+        <!-- 477:11525 — the picture, 900 wide whatever the card's width, so
+             opening a card uncovers more of it rather than scaling it -->
+        <div class="card__media" data-node-id="I1486:22525;477:11525" aria-hidden="true">
+          <img class="card__picture" src="../../assets/images/card-orbit.jpg" alt="" width="1800" height="1200" decoding="async">
+        </div>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22525;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22525;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22525;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22525;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22525;477:11534">Built for orbit</p>
+        <div class="card__foot" data-node-id="I1486:22525;477:11535">
+          <p class="card__body" data-node-id="I1486:22525;477:11536">Our systems are designed around the unique requirements of space: limited mass, extreme environments, continuous operation and the growing energy demands of orbital computing.</p>
+        </div>
+      </article>
+
+      <article class="card" data-card data-node-id="1486:22551">
+        <div class="card__media" data-node-id="I1486:22551;477:11525" aria-hidden="true">
+          <img class="card__picture" src="../../assets/images/card-power.jpg" alt="" width="1800" height="1194" decoding="async">
+        </div>
+        <span class="card__tick card__tick--tl" data-node-id="I1486:22551;477:11517"></span>
+        <span class="card__tick card__tick--tr" data-node-id="I1486:22551;477:11519"></span>
+        <span class="card__tick card__tick--br" data-node-id="I1486:22551;477:11521"></span>
+        <span class="card__tick card__tick--bl" data-node-id="I1486:22551;477:11523"></span>
+        <p class="card__overline" data-node-id="I1486:22551;477:11534">Power is the foundation</p>
+        <div class="card__foot" data-node-id="I1486:22551;477:11535">
+          <p class="card__body" data-node-id="I1486:22551;477:11536">Orbital data centers require a fundamentally different approach to energy. We are developing the technology that can provide the power needed to operate them at scale.</p>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- The scroll the cards are held in view for, and the left card dives
+     over. It draws nothing — see cards.css and cards.js. -->
+<div class="scene" data-scene="dive" aria-hidden="true"></div>
+
+<div class="spacer">End</div>
+
+<script src="smooth.js"></script>
+<script src="cards.js"></script>
+</body>
+</html>

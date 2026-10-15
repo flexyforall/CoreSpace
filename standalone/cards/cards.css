@@ -1,0 +1,527 @@
+/* =========================================================================
+   Core Space — the cards section, on its own
+
+   The three cards from the homepage, lifted out with everything they need
+   and nothing else: the heading that fills as it is read, the cards rising
+   in, the right-hand card swelling open on the way up, the open width
+   flowing right to left with each card's copy filling as it comes to it,
+   and the left card opening out into the window and into its clip.
+
+   Every rule here is the homepage's own (css/style.css), copied rather than
+   linked so this folder stands alone. Pictures, clips and fonts are read
+   from the repository's assets/ two folders up, so keep the folder where it
+   is — or copy those files alongside and change the paths.
+   ========================================================================= */
+
+
+/* --- Fonts ------------------------------------------------------------- */
+
+@font-face {
+  font-family: 'Stack Sans Headline';
+  src: url('../../assets/fonts/StackSansHeadline.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../../assets/fonts/GeistMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Geist Mono';
+  src: url('../../assets/fonts/GeistMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+/* --- Tokens ------------------------------------------------------------ */
+
+:root {
+  --color-bg: #000000;
+  --color-fg: #ffffff;
+  --font-headline: 'Stack Sans Headline', system-ui, sans-serif;
+  --font-label: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  /*
+   * The dive: one window of pin, 160 of scroll for the cards to pass their
+   * width along, then 420 for the card to open out and its clip to run.
+   * cards.js splits the progress on exactly these, so change them together.
+   */
+  --scene-length-dive: 680vh;
+}
+
+
+/* --- Base -------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-headline);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+img {
+  display: block;
+  max-width: none;
+}
+
+
+/* --- The block reveal ----------------------------------------------------
+   Copy is split into its lines and each is wiped on left to right, a solid
+   white rectangle riding the reveal's edge. The geometry is driven per frame
+   from cards.js; these are only the pieces.
+   ------------------------------------------------------------------------- */
+
+.rv-line {
+  display: block;
+  position: relative;
+}
+
+.rv-text {
+  display: inline-block;
+}
+
+.rv-block {
+  position: absolute;
+  top: 0.06em;
+  bottom: 0.06em;
+  left: 0;
+  width: 0.45em;
+  background: var(--color-fg);
+  opacity: 0;
+  pointer-events: none;
+}
+
+
+/* --- Before and after ---------------------------------------------------
+   Only here to give the section a page to scroll through.
+   ------------------------------------------------------------------------- */
+
+.spacer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  height: 100dvh;
+  font-family: var(--font-label);
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.4);
+  background: var(--color-bg);
+}
+
+
+/* --- Cards ---------------------------------------------------------------
+   Figma 339:343. Not a pinned scene — it scrolls past normally, and what the
+   scroll drives is the heading's fill and the cards rising into place.
+   ------------------------------------------------------------------------- */
+
+/*
+ * 339:343 — 160 down each end, 56 in from each side. 160 between the heading
+ * and the cards: the new homepage (1484:6361) gives the heading a block of its
+ * own with 80 under it, and the cards (1486:22522) 80 over them.
+ */
+.cards {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 160px;
+  padding: 160px 56px;
+  background: #030303;
+  overflow: hidden;
+}
+
+/* 339:486 — 24 between the label and the heading */
+.cards__head {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* 339:481 — the same 8px squares and 40px air as the hero's label */
+.cards__label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+}
+
+.cards__square {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  background: var(--color-fg);
+}
+
+/* 339:484 — label/M in caps */
+.cards__labelText {
+  font-family: var(--font-label);
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--color-fg);
+  white-space: nowrap;
+}
+
+/*
+ * 339:374 — headline/H3 at 44/52, tracking -0.5, on 843.
+ *
+ * The frame draws this half read: the part that has been read carries a
+ * gradient that fades away at both ends of the line, and the rest sits at 20%.
+ * The gradient belongs to the paragraph rather than to any character, so it is
+ * painted here and clipped to the text; a character that has been read goes
+ * transparent and lets it through, and one that has not paints its own 20%
+ * over the top. js/scene.js decides which is which.
+ */
+.cards__headline {
+  position: relative;
+  margin: 0;
+  width: 843px;
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: 44px;
+  line-height: 52px;
+  letter-spacing: -0.5px;
+  text-align: center;
+  background-image: linear-gradient(
+    270deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    #ffffff 44.748%,
+    #ffffff 68.858%,
+    rgba(255, 255, 255, 0.4) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: rgba(255, 255, 255, 0.2);
+}
+
+/*
+ * The unread colour has to be opaque, and this is the whole reason the fill
+ * could not be seen.
+ *
+ * The gradient above is painted on the paragraph and clipped to its text, so it
+ * sits *behind* every character. A translucent unread colour — the frame writes
+ * it as rgba(255,255,255,0.2) — lets four fifths of that gradient straight
+ * through, which left read and unread all but identical. Flattened against the
+ * section's #030303 it is the same grey the frame intends, and now it actually
+ * covers what is behind it.
+ */
+.cards__headline span {
+  color: rgb(53, 53, 53);
+  transition: color 320ms ease;
+}
+
+.cards__headline span.is-read {
+  color: transparent;
+}
+
+/*
+ * The row's place in the page. The row itself is lifted out and held in
+ * view where it came to rest while the cards open and the left one dives —
+ * js/scene.js fixes it there — and this keeps the section the height it was,
+ * so nothing below moves when it goes.
+ */
+.cards__track {
+  position: relative;
+  width: 100%;
+  height: 558px;
+}
+
+/* 1486:22523 — 558 tall, 16 apart, on the section's full width */
+.cards__row {
+  position: relative;
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+/* Held: js/scene.js gives it the place the track has in the window. */
+.cards__row.is-held {
+  position: fixed;
+  height: 558px;
+}
+
+/*
+ * 1486:22551 / 22525 / 22524 — black inside a #262626 hairline, 24 of air
+ * all round. The hairline is drawn in an ::after rather than as a border so
+ * that everything inside is placed against the card's own edge, and each
+ * offset below can be the design's number verbatim — a border would move the
+ * containing block in by a pixel and put every one of them out.
+ *
+ * The widths are the frame's: the open card 631, the other two sharing what
+ * is left. js/scene.js takes them over to hand the open one along; this —
+ * the left card open, the last state before it dives — is where they rest,
+ * and what stands with no script or with motion reduced.
+ */
+.card {
+  position: relative;
+  flex: 1 0 0;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg);
+  /* the rise; js/scene.js releases them one after the other */
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 700ms ease, transform 700ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.card.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.card--dive {
+  flex: none;
+  width: 631px;
+}
+
+/*
+ * The hairline paints over the content, so it frames the picture rather than
+ * sitting under it — the picture runs to the card's edge.
+ */
+.card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  box-shadow: inset 0 0 0 1px #262626;
+  pointer-events: none;
+}
+
+/*
+ * 477:11525 — 900 x 558, half a pixel out past the left edge and on the
+ * middle line. Its width is its own, not the card's: a folded card shows the
+ * left of the picture and opening it uncovers the rest.
+ */
+.card__media {
+  position: absolute;
+  top: 50%;
+  left: -0.5px;
+  width: 900px;
+  height: 558px;
+  transform: translateY(-50%);
+}
+
+.card__picture {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/*
+ * The left card's picture is the cupola clip, framed the way the design
+ * frames the still it opens on: 142.44 x 152.9 of the 900 x 558, set 21.22
+ * left and 11.46 up of it — which, on the card, is this rectangle. While the
+ * card opens out into the window js/scene.js carries it from here to covering
+ * whatever size the card has reached.
+ */
+.card__clip {
+  position: absolute;
+  top: -63.95px;
+  left: -191.48px;
+  width: 1281.96px;
+  height: 853.18px;
+  object-fit: cover;
+}
+
+/* 477:11517 etc — a 4px tick 5.5 in from each corner */
+.card__tick {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: var(--color-fg);
+}
+
+.card__tick--tl {
+  top: 5.5px;
+  left: 5.5px;
+}
+
+.card__tick--tr {
+  top: 5.5px;
+  right: 5.5px;
+}
+
+.card__tick--bl {
+  bottom: 5.5px;
+  left: 5.5px;
+}
+
+.card__tick--br {
+  bottom: 5.5px;
+  right: 5.5px;
+}
+
+/*
+ * Everything that makes the left card a card goes as it opens out into the
+ * window, leaving only the picture — js/scene.js sets the value.
+ */
+.card--dive .card__overline,
+.card--dive .card__foot,
+.card--dive .card__tick,
+.card--dive::after {
+  opacity: var(--card-copy, 1);
+}
+
+/*
+ * 477:11534 — headline/Overline: Geist Mono 16/20, tracking 0.4, in caps, at
+ * 70%. 852 wide, which no card is: it stands on one line and the card cuts it.
+ */
+.card__overline {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  margin: 0;
+  width: 852px;
+  font-family: var(--font-label);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/*
+ * 477:11535 — the copy is read out of the card's own black rising behind it,
+ * so the picture it sits over never fights it: 140 of gradient above it, 24
+ * below, 24 in from the left.
+ */
+.card__foot {
+  position: absolute;
+  right: -0.5px;
+  bottom: -0.5px;
+  left: -0.5px;
+  display: flex;
+  align-items: center;
+  padding: 140px 320px 24px 24px;
+  background: linear-gradient(to bottom, rgba(3, 3, 3, 0) 0%, var(--color-bg) 76.155%);
+}
+
+/*
+ * 477:11536 — headline/H7: Stack Sans Headline 22/28, on 556 whatever the
+ * card's width, so a folded card cuts its lines rather than rewrapping them.
+ */
+.card__body {
+  margin: 0;
+  /*
+   * None, or the foot's flexbox squeezes this inside a folded card — and the
+   * block reveal, which measures the real wrap when the card first comes on,
+   * would split it into the squeezed lines rather than these.
+   */
+  flex: none;
+  width: 556px;
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: 22px;
+  line-height: 28px;
+  color: var(--color-fg);
+}
+
+/*
+ * A card's copy stands back until the card is opened, and fills in reading
+ * order as it opens — overline first, then the paragraph line by line. Each
+ * line the reveal has split it into paints its own ink as a gradient clipped
+ * to its text: full up to --fill-at, the inactive ink beyond, with a soft
+ * edge between. js/scene.js sweeps --fill-at through the lines; left to the
+ * default, which is past the end of any line, the copy simply stands full.
+ */
+.card__overline {
+  --ink: rgba(255, 255, 255, 0.7);
+  --ink-dim: rgba(255, 255, 255, 0.21);
+}
+
+.card__body {
+  --ink: var(--color-fg);
+  --ink-dim: rgba(255, 255, 255, 0.3);
+}
+
+.card .rv-text {
+  --fill-at: 9999px;
+  background-image: linear-gradient(
+    90deg,
+    var(--ink) 0,
+    var(--ink) var(--fill-at),
+    var(--ink-dim) calc(var(--fill-at) + 32px),
+    var(--ink-dim) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Reduced motion: everything simply stands where it belongs. */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .cards__headline span {
+    color: transparent;
+    transition: none;
+  }
+}
+
+
+/* --- The dive -----------------------------------------------------------
+   An empty section pulled a window up under the cards, so that it pins just
+   as the row comes to rest — the cards section's foot level with the
+   window's. Its scroll is what holds the row in view while the width flows
+   along it, and then opens the left card out into the window. It draws
+   nothing itself; cards.js reads how far through it the scroll has come.
+   ------------------------------------------------------------------------- */
+
+[data-scene='dive'] {
+  position: relative;
+  height: var(--scene-length-dive);
+  margin-top: -100vh;
+  margin-top: -100dvh;
+  pointer-events: none;
+}
+
+/*
+ * The whole card opens out, not just what is in it — so the card itself leaves
+ * the row and is driven against the window. Everything inside goes on filling
+ * it: the clip covers, the copy stays where the card puts it and fades.
+ */
+.card.is-opening {
+  position: fixed;
+  z-index: 40;
+  height: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-scene='dive'] {
+    display: none;
+  }
+}
