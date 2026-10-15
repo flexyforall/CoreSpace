@@ -50,10 +50,11 @@
   --font-label: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   /*
    * The dive: one window of pin, 160 of scroll for the cards to pass their
-   * width along, then 420 for the card to open out and its clip to run.
-   * cards.js splits the progress on exactly these, so change them together.
+   * width along, 420 for the card to open out and the shot to leave the
+   * cupola, and 560 for it to carry on across to the satellite. cards.js
+   * splits the progress on exactly these, so change them together.
    */
-  --scene-length-dive: 680vh;
+  --scene-length-dive: 1240vh;
 }
 
 

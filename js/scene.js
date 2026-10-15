@@ -143,21 +143,23 @@
 
   /*
    * Outside the spacecraft. The section first holds the cards above in view
-   * while their open width is handed along, then runs two clips end to end —
-   * so its scroll is read as three legs, and every fraction below is a
-   * fraction of whichever leg it belongs to rather than of the section.
+   * while their open width is handed along, then runs one clip — out of the
+   * cupola and across to the satellite — so its scroll is read as three
+   * legs, and every fraction below is a fraction of whichever leg it belongs
+   * to rather than of the section.
    *
    * The lengths are the ones --scene-length-flight is built out of: the cards
-   * are given 160 of scroll, the cupola leg keeps the 420 it has always had,
-   * and the orbit that carries on from it 560 more. Changing any of them
-   * means changing that custom property to match.
+   * are given 160 of scroll, the opening leg — the card taking the window and
+   * the shot leaving the cupola — keeps the 420 it has always had, and the
+   * approach to the satellite 560 more. Changing any of them means changing
+   * that custom property to match.
    */
   var FLIGHT_CARDS_VH = 160;
   var FLIGHT_CUPOLA_VH = 420;
   var FLIGHT_ORBIT_VH = 560;
   var FLIGHT_CARDS_SPLIT =
     FLIGHT_CARDS_VH / (FLIGHT_CARDS_VH + FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
-  /* The two clips' split, as a share of what is left after the cards. */
+  /* The opening leg's end, as a share of what is left after the cards. */
   var FLIGHT_SPLIT = FLIGHT_CUPOLA_VH / (FLIGHT_CUPOLA_VH + FLIGHT_ORBIT_VH);
   /*
    * The cards never stand still, as the pair never did. They come up the
@@ -183,69 +185,17 @@
    */
   var CARD_FILL_EDGE = 32;
   /*
-   * The scroll the hand-over is dissolved across. The cupola clip's last
-   * frame and the orbit clip's first are the same moment of the same move,
-   * one twenty-fourth of a second apart, so this is not there to hide a cut
-   * — it is there so that a frame the second clip has not painted yet can
-   * never show as a flash of black.
-   */
-  var FLIGHT_SEAM = 0.006;
-  /*
-   * The orbit clip opens by backing away. The cupola leg ends closing on the
-   * satellite hard — its last frames gain on it faster and faster — and the
-   * clip that takes over eases out of that move by pulling back about a fifth
-   * over its first thirty-five frames, not returning to the size it opened on
-   * until frame seventy. Cut together, that reads as the camera stopping and
-   * rolling back just after the hand-over.
-   *
-   * Starting the clip later does not answer it: the frame it opens on is the
-   * one the cupola closes on almost exactly, and every later frame has the
-   * satellite turned some way round, so any other cut is a visible jump — and
-   * one still a fifth smaller, which is the same rollback in a single step.
-   *
-   * So the pull-back is cancelled optically instead: the picture is scaled by
-   * the inverse of what the render gives away, read off the clip frame by
-   * frame, and let back down only as the clip's own approach takes over.
-   * Times are seconds into the clip; at the join it is exactly 1, so the
-   * hand-over itself is untouched.
-   */
-  var ORBIT_HOLD = [
-    [0.0, 1.0], // the join, left exactly as it is
-    [0.2, 1.09], // most of the ground is given away in the first half second
-    [0.4, 1.17],
-    [0.7, 1.23],
-    [1.3, 1.25], // the pull-back is at its worst about here...
-    [1.8, 1.24], // ...and holds there
-    [2.1, 1.18],
-    [2.35, 1.09],
-    [2.55, 1.0], // by here the clip is closing again under its own power
-  ];
-  /*
-   * The point it is scaled about is where the satellite sits across that
-   * stretch rather than the middle of the window — scaling about the middle
-   * would swing it outwards as it grows. That is `transform-origin` on
-   * .card__media--orbit in the stylesheet.
-   */
-  /*
-   * Fractions of the orbit leg: where the second and third points arrive.
-   * Both wait out the stretch above — the copy should change on a camera
-   * that is moving, not on one being held still.
-   *
-   * The third stands as far down the clip as the section will carry it. The
-   * two intervals cannot be made equal: the first runs from the first point,
-   * which arrives before the hand-over, all the way through the second's
-   * three-second wait into the clip, and the third would have to sit past
-   * the end of the clip to match it — the leg would have to be four times
-   * this long. So the third is put where it still has a window to be read in
-   * before the section below covers it, which halves the difference rather
-   * than closing it.
+   * Fractions of the approach leg: where the second and third points arrive,
+   * as the shot closes on the satellite. The third stands as far down the
+   * clip as the section will carry it while it still has a window to be read
+   * in before the section below covers it.
    */
   var POINT_2_FROM = 0.42;
   var POINT_3_FROM = 0.72;
   /*
-   * The three points read off the orbit, in the order it brings them round.
-   * The first is the one the frame draws, and stands from DEVICE_FROM on the
-   * cupola leg through the hand-over until the second comes up.
+   * The three points read off the satellite, in the order the approach
+   * brings them round. The first is the one the frame draws, and stands from
+   * DEVICE_FROM on the opening leg until the second comes up.
    */
   var FLIGHT_POINTS = [
     {
@@ -262,15 +212,10 @@
     },
   ];
 
-  /* Fractions of the cupola leg's own scroll. */
+  /* Fractions of the opening leg's own scroll. */
   var FLIGHT_PREROLL = 1.2; // seconds the clip creeps through while the card scales
   var FLIGHT_WIDEN_BY = 0.09; // the left card has taken the whole row by here...
   var FLIGHT_OPEN_BY = 0.24; // ...and has taken the whole window by here
-  /*
-   * ...and the cupola clip has run to its end by here — the end of its own
-   * leg, where the orbit picks the move up on the next frame.
-   */
-  var FLIGHT_RUN_BY = 1;
   var TEXT_IN_FROM = 0.26; // the intro copy writes on over the flight...
   var TEXT_IN_BY = 0.6; // ...and has written itself out again by here
   var DEVICE_FROM = 0.68; // the first point arrives with the satellite
@@ -1485,32 +1430,12 @@
     el.style.left = el.style.top = el.style.width = el.style.height = '';
   }
 
-  /*
-   * The compensating scale for a given second of the orbit clip, read off
-   * ORBIT_HOLD and eased between its samples so the correction itself never
-   * has a corner in it. Past the last sample there is nothing to correct.
-   */
-  function orbitHold(t) {
-    var last = ORBIT_HOLD.length - 1;
-    if (t <= ORBIT_HOLD[0][0]) return ORBIT_HOLD[0][1];
-    if (t >= ORBIT_HOLD[last][0]) return ORBIT_HOLD[last][1];
-    for (var i = 1; i <= last; i++) {
-      if (t > ORBIT_HOLD[i][0]) continue;
-      var a = ORBIT_HOLD[i - 1];
-      var b = ORBIT_HOLD[i];
-      var k = (t - a[0]) / (b[0] - a[0]);
-      return a[1] + (b[1] - a[1]) * (k * k * (3 - 2 * k));
-    }
-    return 1;
-  }
-
   function setUpFlight() {
     var scene = document.querySelector('[data-scene="flight"]');
     if (!scene) return;
 
     var video = document.querySelector('[data-flight-video]');
     var card = video ? video.closest('[data-card]') : null;
-    var orbit = card ? card.querySelector('[data-flight-orbit]') : null;
     var row = card ? card.closest('[data-card-row]') : null;
     var track = row ? row.closest('[data-card-track]') : null;
     var stand = track ? track.closest('[data-cards]') : null;
@@ -1527,9 +1452,7 @@
 
     var letters = splitCharacters(heading);
     var seek = seeker(video);
-    var seekOrbit = orbit ? seeker(orbit) : null;
     video.pause();
-    if (orbit) orbit.pause();
 
     if (reduced) {
       scene.style.height = 'auto';
@@ -1601,11 +1524,11 @@
       var pk = clamp01(whole / FLIGHT_CARDS_SPLIT);
       var p = clamp01((whole - FLIGHT_CARDS_SPLIT) / (1 - FLIGHT_CARDS_SPLIT));
       /*
-       * Two clips, one move. That remainder is split at the frame the cupola
-       * clip runs out on: everything the first leg does is read off `p`
-       * rescaled to its own length, and the orbit that carries the shot on is
-       * read off what is left. Both are clamped, so the first leg simply
-       * holds at its end while the second runs.
+       * That remainder is one move in two legs: the opening — the card taking
+       * the window and the shot leaving the cupola — and the approach to the
+       * satellite. What happens on each is read off `p` rescaled to its own
+       * length; both are clamped, so the first simply holds at its end while
+       * the second runs. The clip itself runs across both — see below.
        */
       var pc = clamp01(p / FLIGHT_SPLIT);
       var po = clamp01((p - FLIGHT_SPLIT) / (1 - FLIGHT_SPLIT));
@@ -1762,49 +1685,23 @@
 
       /*
        * While the card scales, the clip creeps a few frames forward — still
-       * well inside the cupola, never out through the glass. The flight
-       * proper picks up from exactly where the creep leaves off, so the
-       * playhead never jumps.
+       * well inside the cupola, never out through the glass. Once the card
+       * has the window the clip runs on from exactly where the creep left off,
+       * so the playhead never jumps, and it runs evenly across everything left
+       * of the section — out through the glass on the opening leg, across to
+       * the satellite on the approach — reaching its last frame with the
+       * section's end, under the section that covers this one.
        */
       if (video.duration) {
-        if (p > FLIGHT_SPLIT + FLIGHT_SEAM) {
-          /*
-           * Past the hand-over the cupola clip is hidden, so it is parked on
-           * the frame it handed over on rather than gone on being scrubbed.
-           * Parked, not merely left: a page opened at a scroll position past
-           * the seam has never run this clip at all, and scrolling back up
-           * would otherwise fade in whatever frame it happened to be on.
-           */
-          seek(video.duration);
-        } else {
-          var creep = clamp01(pc / FLIGHT_OPEN_BY);
-          var run = clamp01((pc - FLIGHT_OPEN_BY) / (FLIGHT_RUN_BY - FLIGHT_OPEN_BY));
-          seek(
-            run > 0
-              ? FLIGHT_PREROLL + run * (video.duration - FLIGHT_PREROLL)
-              : creep * FLIGHT_PREROLL
-          );
-        }
+        var creep = clamp01(pc / FLIGHT_OPEN_BY);
+        var runFrom = FLIGHT_SPLIT * FLIGHT_OPEN_BY;
+        var run = clamp01((p - runFrom) / (1 - runFrom));
+        seek(
+          run > 0
+            ? FLIGHT_PREROLL + run * (video.duration - FLIGHT_PREROLL)
+            : creep * FLIGHT_PREROLL
+        );
       }
-
-      /*
-       * The hand-over. The orbit clip is scrubbed the whole way through the
-       * section, not only after the seam: while the cupola still has the
-       * screen it is being held on its opening frame, which is the frame the
-       * cupola is running toward, so by the time the one above is taken off
-       * the picture underneath is already painted and already right.
-       *
-       * The clip runs on to its end under the section that covers this one,
-       * the same as the cupola's used to — the move never stops, it is only
-       * covered over.
-       */
-      if (orbit && orbit.duration) {
-        var ot = po * orbit.duration;
-        seekOrbit(ot);
-        /* ...and the clip's own pull-back taken back out of it. */
-        orbit.style.transform = 'scale(' + orbitHold(ot).toFixed(4) + ')';
-      }
-      video.style.opacity = String(1 - clamp01((p - FLIGHT_SPLIT) / FLIGHT_SEAM));
 
       /* The intro copy writes itself on over the flight out through the glass. */
       var fill = clamp01((pc - TEXT_IN_FROM) / (TEXT_IN_BY - TEXT_IN_FROM));
@@ -1827,9 +1724,9 @@
       }
 
       /*
-       * The points. The first arrives once the satellite is all that is left
-       * of the cupola leg and stands through the hand-over; the orbit brings
-       * the other two round after it. Each is written and wiped on where the
+       * The points. The first arrives as the shot clears the cupola and the
+       * satellite comes into view; the approach brings the other two round
+       * after it. Each is written and wiped on where the
        * one before stood, so the corner reads as one place being updated
        * rather than three blocks taking turns — and scrolling back up walks
        * the same list backwards, off the end of it to nothing at all.

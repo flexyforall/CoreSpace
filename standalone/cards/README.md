@@ -24,5 +24,6 @@ these alongside it and change the paths in `index.html` and `cards.css`:
 - `assets/fonts/StackSansHeadline.woff2`, `GeistMono-Regular.woff2`, `GeistMono-Medium.woff2`
 
 The timing lives at the top of `cards.js` (`DIVE_CARDS_VH`, `DIVE_OPEN_VH`,
-`CARDS_LINGER` and the rest) and in `--scene-length-dive` in `cards.css`; the
-two lengths and that custom property have to be changed together.
+`DIVE_ON_VH`, `CARDS_LINGER` and the rest) and in `--scene-length-dive` in
+`cards.css`; the three lengths and that custom property have to be changed
+together.

@@ -172,10 +172,11 @@
    */
   --scene-length-hero: 100vh;
   /*
-   * The flight is the cards opening and then two clips end to end: one
-   * window of pin, 160 of scroll for the cards above to pass their width
-   * leftwards with each of them read, then 420 for the cupola leg — what it
-   * has always had — and 560 more for the orbit that carries on from it.
+   * The flight is the cards opening and then one clip: one window of pin,
+   * 160 of scroll for the cards above to pass their width leftwards with
+   * each of them read, then 420 for the opening leg — the card taking the
+   * window and the shot leaving the cupola, what it has always had — and 560
+   * more for the approach to the satellite.
    * js/scene.js splits its progress on exactly those three lengths, so they
    * have to be changed together.
    */
@@ -1295,21 +1296,6 @@ html.is-held [data-scene='hero'] button {
   width: 1281.96px;
   height: 853.18px;
   object-fit: cover;
-}
-
-/*
- * The second clip, held under the first. It carries no poster fill of its
- * own — the frame it opens on is the frame the one above closes on, and
- * black is what shows through anywhere the two do not quite meet.
- */
-.card__clip--orbit {
-  background: #000;
-  /*
-   * js/scene.js scales this to take the clip's own pull-back back out of it,
-   * and scales it about where the satellite sits rather than about the middle
-   * of the window, so the satellite holds its place while it does.
-   */
-  transform-origin: 62% 53%;
 }
 
 /* 477:11517 etc — a 4px tick 5.5 in from each corner */

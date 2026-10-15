@@ -30,21 +30,14 @@ const ALLOWED_OFF_TARGET = FRAME * 1.5;
 const SCENES = [
   { name: 'role', video: '[data-role-video]', restsOnTarget: true },
   /*
-   * The flight runs two clips end to end over one section. Ramping the whole
-   * section takes each of them across its own leg and then holds it — so both
-   * must run clean to their last frame and stay there, which is what makes the
-   * hand-over between them a cut and not a jump.
+   * The flight is one clip scrubbed across the whole section, out of the
+   * cupola and across to the satellite: ramping the section must take it
+   * clean to its last frame and leave it there.
    */
   {
     name: 'flight',
     label: 'cupola',
     video: '[data-flight-video]',
-    restsOnTarget: true,
-  },
-  {
-    name: 'flight',
-    label: 'orbit',
-    video: '[data-flight-orbit]',
     restsOnTarget: true,
   },
   /*

@@ -46,13 +46,17 @@
   var REVEAL_STAGGER = 220; // ms between lines setting off
 
   /*
-   * The dive section's scroll, read as two legs. The lengths are the ones
+   * The dive section's scroll, read as three legs. The lengths are the ones
    * --scene-length-dive is built out of — one window of pin, then these —
-   * so change them together.
+   * so change them together. They are the homepage's, so the clip runs here
+   * at the pace it runs there.
    */
   var DIVE_CARDS_VH = 160; // the cards held in view while the width flows
-  var DIVE_OPEN_VH = 420; // the left card opening out and its clip running
-  var DIVE_CARDS_SPLIT = DIVE_CARDS_VH / (DIVE_CARDS_VH + DIVE_OPEN_VH);
+  var DIVE_OPEN_VH = 420; // the left card opening out, the shot leaving the cupola
+  var DIVE_ON_VH = 560; // the shot carrying on across to the satellite
+  var DIVE_CARDS_SPLIT = DIVE_CARDS_VH / (DIVE_CARDS_VH + DIVE_OPEN_VH + DIVE_ON_VH);
+  /* The opening leg's end, as a share of what is left after the cards. */
+  var DIVE_OPEN_SPLIT = DIVE_OPEN_VH / (DIVE_OPEN_VH + DIVE_ON_VH);
 
   /*
    * The cards never stand still. They come up the window three equal and
@@ -78,7 +82,6 @@
   var DIVE_PREROLL = 1.2; // seconds the clip creeps through while the card scales
   var DIVE_WIDEN_BY = 0.09; // the left card has taken the whole row by here...
   var DIVE_OPEN_BY = 0.24; // ...and has taken the whole window by here
-  var DIVE_RUN_BY = 1; // ...and its clip has run to its last frame by here
 
   var SEEK_EPSILON = 0.008; // ignore seeks smaller than a third of a frame
 
@@ -465,11 +468,12 @@
     register(function () {
       var whole = progressOf(scene);
       /*
-       * Two legs: the cards held in view while the width flows along them,
-       * then the left card opening out and its clip running.
+       * The cards held in view while the width flows along them; then the
+       * left card opening out, and its clip running on across what is left.
        */
       var pk = clamp01(whole / DIVE_CARDS_SPLIT);
-      var pc = clamp01((whole - DIVE_CARDS_SPLIT) / (1 - DIVE_CARDS_SPLIT));
+      var p = clamp01((whole - DIVE_CARDS_SPLIT) / (1 - DIVE_CARDS_SPLIT));
+      var pc = clamp01(p / DIVE_OPEN_SPLIT);
 
       /*
        * The left card opens out in two moves, and it is the whole card that
@@ -601,12 +605,14 @@
 
       /*
        * While the card scales, the clip creeps a few frames forward — still
-       * well inside the cupola. Then it runs to its last frame, picking up
-       * from exactly where the creep left off, so the playhead never jumps.
+       * well inside the cupola. Once the card has the window the clip runs on
+       * from exactly where the creep left off, so the playhead never jumps,
+       * evenly across everything left of the section to its last frame.
        */
       if (video.duration) {
         var creep = clamp01(pc / DIVE_OPEN_BY);
-        var run = clamp01((pc - DIVE_OPEN_BY) / (DIVE_RUN_BY - DIVE_OPEN_BY));
+        var runFrom = DIVE_OPEN_SPLIT * DIVE_OPEN_BY;
+        var run = clamp01((p - runFrom) / (1 - runFrom));
         seek(
           run > 0
             ? DIVE_PREROLL + run * (video.duration - DIVE_PREROLL)
